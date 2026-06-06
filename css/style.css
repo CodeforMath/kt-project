@@ -381,9 +381,12 @@ p {
 
 /* Đường phân cách giữa các section */
 .section-divider {
-    height: 5px;
-    width: 900px; /* Độ dài vừa phải */
-    margin: 10px auto; /* Khoảng cách trên dưới */
+    height: 2px; /* Giảm độ dày một chút cho thanh lịch */
+    width: 100%;
+    max-width: 900px; /* Giữ tối đa 900px trên PC, nhưng tự co lại trên Mobile */
+    margin: 30px auto; /* Tăng khoảng cách trên dưới cho thoáng rộng */
+    padding: 0 20px; /* Khoảng cách an toàn chống chạm mép màn hình điện thoại */
+    box-sizing: border-box;
     background: linear-gradient(to right, transparent, #ccc, transparent);
 }
 /* ==========================================================================
@@ -846,7 +849,9 @@ p {
         margin: 15px auto; /* Giảm bớt khoảng cách lề */
         border-radius: 15px; /* Bo góc nhẹ hơn cho hợp với màn hình nhỏ */
     }
-
+    .section-divider {
+        margin: 20px auto; /* Thu hẹp khoảng cách vừa phải trên điện thoại */
+    }
     .about-image {
         border-radius: 15px;
     }
