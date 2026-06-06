@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản lý bài viết - Khoa Toán HUSC</title>
+    <style>
+        :root { --primary: #004488; --danger: #dc3545; --success: #28a745; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f9; padding: 20px; color: #333; }
+        .admin-box { max-width: 1100px; margin: auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 5px 25px rgba(0,0,0,0.1); }
+        h2 { color: var(--primary); text-align: center; border-bottom: 2px solid var(--primary); padding-bottom: 10px; }
+        
+        /* Hướng dẫn các bước */
+        .steps { display: flex; justify-content: space-between; margin-bottom: 30px; gap: 15px; }
+        .step { flex: 1; background: #eef2f7; padding: 15px; border-radius: 8px; border-left: 4px solid var(--primary); font-size: 14px; }
+        .step b { color: var(--primary); display: block; margin-bottom: 5px; }
+
+        /* Bảng danh sách */
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; }
+        th { background: var(--primary); color: white; padding: 12px; text-align: left; }
+        td { padding: 12px; border-bottom: 1px solid #eee; font-size: 14px; }
+        tr:hover { background: #f9f9f9; }
+
+        /* Nút bấm */
+        .btn { padding: 8px 16px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .btn-del { background: var(--danger); color: white; }
+        .btn-del:hover { background: #bd2130; }
+        .btn-export { background: var(--success); color: white; width: 100%; font-size: 16px; margin-top: 20px; padding: 15px; }
+        .btn-export:hover { background: #218838; }
+        
+        .upload-area { border: 2px dashed #ccc; padding: 30px; text-align: center; border-radius: 10px; margin-bottom: 20px; transition: 0.3s; }
+        .upload-area:hover { border-color: var(--primary); background: #f0f7ff; }
+        
+        .cat-tag { padding: 3px 8px; border-radius: 10px; font-size: 11px; font-weight: bold; text-transform: uppercase; }
+        .tag-tin-tuc { background: #d1ecf1; color: #0c5460; }
+        .tag-thong-bao { background: #fff3cd; color: #856404; }
+        .tag-hoc-bong { background: #d4edda; color: #155724; }
+    </style>
+</head>
+<body>
+
+<div class="admin-box">
+    <h2>🛠 Quản trị nội dung website Khoa Toán</h2>
+
+    <div class="steps">
+        <div class="step">
+            <b>BƯỚC 1: NẠP FILE</b>
+            Chọn file <code>data.json</code> ở thư mục gốc để xem danh sách.
+        </div>
+        <div class="step">
+            <b>BƯỚC 2: CHỈNH SỬA</b>
+            Nhấn "Xóa" những bài viết cũ hoặc nhầm lẫn.
+        </div>
+        <div class="step">
+            <b>BƯỚC 3: CẬP NHẬT</b>
+            Tải file mới về và chép đè vào file <code>data.json</code> cũ.
+        </div>
+    </div>
+
+    <div class="upload-area" id="dropZone">
+        <p>Thả file <b>data.json</b> vào đây hoặc</p>
+        <input type="file" id="fileInput" accept=".json">
+    </div>
+
+    <div id="managerContent" style="display:none;">
+        <table id="dataTable">
+            <thead>
+                <tr>
+                    <th>Ngày đăng</th>
+                    <th>Chuyên mục</th>
+                    <th>Tiêu đề bài viết</th>
+                    <th style="width: 100px;">Hành động</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+
+        <button class="btn btn-export" onclick="exportJSON()">📥 TẢI FILE DATA.JSON ĐÃ CẬP NHẬT</button>
+    </div>
+</div>
+
+<script>
+    let currentData = {};
+
+    // Xử lý nạp file
+    document.getElementById('fileInput').addEventListener('change', function(e) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            try {
+                currentData = JSON.parse(event.target.result);
+                document.getElementById('managerContent').style.display = 'block';
+                renderTable();
+            } catch (err) {
+                alert("File không đúng định dạng JSON. Vui lòng kiểm tra lại!");
+            }
+        };
+        reader.readAsText(e.target.files[0]);
+    });
+
+    // Hiển thị danh sách bài viết
+    function renderTable() {
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = '';
+        const categories = ['tin-tuc', 'thong-bao', 'hoc-bong', 'doan-hoi'];
+
+        categories.forEach(cat => {
+            if (currentData[cat] && Array.isArray(currentData[cat])) {
+                currentData[cat].forEach((item, index) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${item.date}</td>
+                        <td><span class="cat-tag tag-${cat}">${cat}</span></td>
+                        <td style="font-weight:500">${item.title}</td>
+                        <td>
+                            <button class="btn btn-del" onclick="deleteItem('${cat}', ${index})">Xóa</button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            }
+        });
+    }
+
+    // Xóa bài viết
+    function deleteItem(cat, index) {
+        if (confirm(`Bạn có chắc muốn xóa bài viết: "${currentData[cat][index].title}"?`)) {
+            currentData[cat].splice(index, 1);
+            renderTable();
+        }
+    }
+
+    // Xuất file JSON mới
+    function exportJSON() {
+        const blob = new Blob([JSON.stringify(currentData, null, 4)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'data.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        
+        alert("Thành công! Hãy chép file vừa tải về vào thư mục gốc của trang web.");
+    }
+</script>
+
+</body>
+</html>

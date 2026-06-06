@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Công cụ đăng bài - Khoa Toán</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; padding: 20px; color: #333; }
+        .container { max-width: 800px; background: white; padding: 30px; margin: auto; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; color: #004488; }
+        input, select, textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
+        textarea { resize: vertical; }
+        #result-box { margin-top: 25px; display: none; border-top: 2px dashed #004488; pt: 20px; }
+        pre { background: #1e1e1e; color: #dcdcdc; padding: 15px; overflow-x: auto; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+        .copy-btn { background: #004488; color: white; padding: 15px; border: none; border-radius: 6px; cursor: pointer; width: 100%; font-size: 16px; font-weight: bold; transition: 0.3s; }
+        .copy-btn:hover { background: #002d5a; }
+        .tip { font-size: 12px; color: #666; font-style: italic; margin-top: 4px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 style="text-align: center; color: #004488;">✍️ Tạo bài viết mới cho Khoa Toán</h2>
+        
+        <div class="form-group">
+            <label>Chuyên mục</label>
+            <select id="categoryType">
+                <option value="tin-tuc">Tin tức & Sự kiện</option>
+                <option value="thong-bao">Thông báo mới</option>
+                <option value="hoc-bong">Học bổng</option>
+                <option value="doan-hoi">Đoàn - Hội</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Tiêu đề bài viết</label>
+            <input type="text" id="title" placeholder="Ví dụ: Lễ trao bằng tốt nghiệp 2026">
+        </div>
+
+        <div class="form-group">
+            <label>Tên file ảnh (để trong thư mục graph/)</label>
+            <input type="text" id="image" placeholder="Ví dụ: anh-bia.jpg">
+        </div>
+
+        <div class="form-group">
+            <label>Tóm tắt bài viết (Excerpt)</label>
+            <textarea id="excerpt" rows="2" placeholder="Hiển thị ở trang danh mục..."></textarea>
+        </div>
+
+        <div class="form-group">
+            <label>Nội dung chi tiết (Content)</label>
+            <textarea id="content" rows="8" placeholder="Nhập nội dung bài viết. Bạn có thể dùng thẻ <p>, <strong>..."></textarea>
+            <p class="tip">* Mẹo: Các đoạn văn nên bọc trong thẻ &lt;p&gt;Nội dung...&lt;/p&gt;</p>
+        </div>
+
+        <button class="copy-btn" onclick="generateJSON()">TẠO MÃ JSON & COPY</button>
+
+        <div id="result-box">
+            <p><strong>✅ Bước 1:</strong> Copy đoạn mã dưới đây:</p>
+            <pre id="json-output"></pre>
+            <p><strong>✅ Bước 2:</strong> Mở file <code>data.json</code>, tìm mục <b>"<span id="cat-label"></span>"</b> và dán vào ngay sau dấu <b>[</b></p>
+        </div>
+    </div>
+
+    <script>
+        function generateJSON() {
+            const cat = document.getElementById('categoryType').value;
+            const contentRaw = document.getElementById('content').value;
+            
+            // Xử lý xuống dòng thành thẻ <p> nếu người dùng không rành HTML
+            let formattedContent = contentRaw;
+            if (!contentRaw.includes('<p>')) {
+                formattedContent = contentRaw.split('\n').filter(p => p.trim() !== '').map(p => `<p>${p.trim()}</p>`).join('');
+            }
+
+            const data = {
+                "id": "tin-" + Date.now(),
+                "title": document.getElementById('title').value,
+                "date": new Date().toLocaleDateString('vi-VN'),
+                "image": "./graph/" + document.getElementById('image').value,
+                "excerpt": document.getElementById('excerpt').value,
+                "content": formattedContent
+            };
+
+            const output = JSON.stringify(data, null, 4) + ",";
+            document.getElementById('json-output').innerText = output;
+            document.getElementById('cat-label').innerText = cat;
+            document.getElementById('result-box').style.display = 'block';
+
+            // Tự động copy vào clipboard
+            navigator.clipboard.writeText(output).then(() => {
+                alert("Đã tạo và sao chép mã JSON thành công!");
+            });
+        }
+    </script>
+</body>
+</html>

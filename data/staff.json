@@ -1,0 +1,352 @@
+{
+  "staff_data": [
+    {
+      "id": "ts-le-anh-tuan",
+      "name": "TS. Lê Anh Tuấn",
+      "gender": "Nam",
+      "birthday": "1979",
+      "title": "Trưởng khoa",
+      "image": "graph/ts-le-anh-tuan.jpg",
+      "type": "giang-vien",
+      "is_management": true,
+      "roles": ["ban-chu-nhiem", "truong-khoa"],
+      "department": "toan-ly-thuyet",
+      "department_name": "Bộ môn Toán Lý thuyết",
+      "contact": { "email": "latuan@husc.edu.vn", "phone": "0982.006.510" },
+      "education": [
+        { "level": "Đại học", "major": "Toán học", "place": "Trường Đại học Khoa học, Đại học Huế", "year": "2001" },
+        { "level": "Thạc sĩ", "major": "Toán học", "place": "Trường Đại học Khoa học, Đại học Huế", "year": "2005" },
+        { "level": "Tiến sĩ", "major": "Toán học", "place": "Trường Đại học Sư phạm Hà Nội", "year": "2019" }
+      ],
+      "research_fields": ["Ổn định và điều khiển các hệ động lực có trễ", "Giải tích hàm", "Phương trình vi phân"],
+      "science_url": "https://csdlkhoahoc.hueuni.edu.vn/index.php/scientist/detail/id/324"
+    },
+    {
+      "id": "ths-ngo-nhan-duc",
+      "name": "ThS. Ngô Nhân Đức",
+      "gender": "Nam",
+      "birthday": "1980",
+      "title": "Phó Trưởng khoa",
+      "image": "graph/ths-ngo-nhan-duc.jpg",
+      "type": "giang-vien",
+      "is_management": true,
+      "roles": ["ban-chu-nhiem", "pho-truong-khoa"],
+      "department": "toan-ung-dung",
+      "department_name": "Bộ môn Toán ứng dụng",
+      "contact": { "email": "ngonhanduc@gmail.com", "phone": "0914.478.070" },
+      "education": [
+        { "level": "Đại học", "major": "Toán học", "place": "Trường Đại học Khoa học, Đại học Huế", "year": "2002" },
+        { "level": "Thạc sĩ", "major": "Toán học (Lý thuyết tối ưu)", "place": "Trường Đại học Khoa học, Đại học Huế", "year": "2008" }
+      ],
+      "research_fields": ["Toán học", "Lý thuyết tối ưu"],
+      "science_url": "https://csdlkhoahoc.hueuni.edu.vn/index.php/scientist/detail/id/331"
+    },
+    {
+      "id": "ts-nguyen-hoang-son",
+      "name": "TS. Nguyễn Hoàng Sơn",
+      "gender": "Nam",
+      "birthday": "1973",
+      "title": "Trưởng bộ môn Toán ứng dụng",
+      "image": "graph/ts-nguyen-hoang-son.jpg",
+      "type": "giang-vien",
+      "is_management": true,
+      "roles": ["truong-bo-mon"],
+      "department": "toan-ung-dung",
+      "department_name": "Bộ môn Toán ứng dụng",
+      "contact": { "email": "nhson@hueuni.edu.vn", "phone": "" },
+      "education": [
+        { "level": "Đại học", "major": "Toán học", "place": "Trường Đại học Khoa học, Đại học Huế", "year": "1995" },
+        { "level": "Thạc sĩ", "major": "Tin học", "place": "Đại học Bách khoa Hà Nội", "year": "1998" },
+        { "level": "Tiến sĩ", "major": "Toán học", "place": "Viện Công nghệ Thông tin", "year": "2007" }
+      ],
+      "research_fields": ["Khai phá dữ liệu", "Toán rời rạc", "Lý thuyết độ phức tạp tính toán"],
+      "teaching_fields": ["Khoa học máy tính", "Bảo đảm toán học cho máy tính và hệ thống tính toán"],
+      "science_url": "https://csdlkhoahoc.hueuni.edu.vn/index.php/scientist/detail/id/102"
+    },
+    {
+      "id": "ts-bui-van-chien",
+      "name": "TS. Bùi Văn Chiến",
+      "gender": "Nam",
+      "birthday": "1986",
+      "title": "Trưởng bộ môn Toán lý thuyết",
+      "image": "graph/ts-bui-van-chien.jpg",
+      "type": "giang-vien",
+      "is_management": true,
+      "roles": ["truong-bo-mon", "tl-sau-dai-hoc"],
+      "department": "toan-ly-thuyet",
+      "department_name": "Bộ môn Toán lý thuyết",
+      "contact": { "email": "bvchien@hueuni.edu.vn", "phone": "" },
+      "education": [
+        { "level": "Đại học", "major": "Toán học", "place": "Trường Đại học Khoa học, Đại học Huế", "year": "2009" },
+        { "level": "Thạc sĩ", "major": "Toán học", "place": "Viện Toán học và Đại học Paris 13, Pháp", "year": "2012" },
+        { "level": "Tiến sĩ", "major": "Toán - Tin", "place": "Đại học Paris 13, Pháp", "year": "2016" }
+      ],
+      "research_fields": ["Lý thuyết số", "Đại số tổ hợp"],
+      "science_url": "https://csdlkhoahoc.hueuni.edu.vn/index.php/scientist/detail/id/338"
+    },
+    {
+      "id": "ts-nguyen-van-son",
+      "name": "TS. Nguyễn Văn Sơn",
+      "gender": "Nam",
+      "birthday": "1977",
+      "title": "Trưởng bộ môn Xác suất Thống kê",
+      "image": "graph/ts-nguyen-van-son.jpg",
+      "type": "giang-vien",
+      "is_management": true,
+      "roles": ["truong-bo-mon"],
+      "department": "xac-suat-thong-ke",
+      "department_name": "Bộ môn Xác suất Thống kê",
+      "contact": { "email": "son.nv2001@gmail.com", "phone": "" },
+      "education": [
+        { "level": "Đại học", "major": "Toán học", "place": "Trường Đại học Khoa học, Đại học Huế", "year": "2001" },
+        { "level": "Tiến sĩ", "major": "Toán học", "place": "Trường Đại học Tổng hợp Greifswald, CHLB Đức", "year": "2010" }
+      ],
+      "research_fields": ["Toán học", "Lý thuyết xác suất và thống kê toán học"],
+      "teaching_fields": ["Xác suất Thống kê"],
+      "science_url": "https://csdlkhoahoc.hueuni.edu.vn/index.php/scientist/detail/id/344"
+    },
+    {
+      "id": "cn-mai-thi-le",
+      "name": "CN. Mai Thị Lệ",
+      "gender": "Nữ",
+      "birthday": "1975",
+      "title": "Giảng viên",
+      "image": "graph/cn-mai-thi-le.jpg",
+      "type": "giang-vien",
+      "is_management": false,
+      "roles": ["tl-ctsv-dbcl"],
+      "department": "toan-ung-dung",
+      "department_name": "Bộ môn Toán ứng dụng",
+      "contact": { "email": "", "phone": "0985.155.117" },
+      "education": [
+        { "level": "Đại học", "major": "Toán học", "place": "Trường Đại học Khoa học, Đại học Huế", "year": "" }
+      ],
+      "research_fields": ["Toán học"],
+      "science_url": "https://csdlkhoahoc.hueuni.edu.vn/index.php/scientist/detail/id/332"
+    },
+    {
+      "id": "cn-nguyen-thi-vui",
+      "name": "CN. Nguyễn Thị Vui",
+      "gender": "Nữ",
+      "birthday": "1975",
+      "title": "Văn thư",
+      "image": "graph/cn-nguyen-thi-vui.jpg",
+      "type": "van-thu",
+      "is_management": false,
+      "roles": ["van-thu", "tl-giao-vu"],
+      "department": "xac-suat-thong-ke",
+      "department_name": "Bộ môn Xác suất Thống kê"
+    },
+    {
+      "id": "pgs-ts-nguyen-dang-ho-hai",
+      "name": "PGS.TS. Nguyễn Đặng Hồ Hải",
+      "gender": "Nam",
+      "birthday": "1981",
+      "title": "Giảng viên",
+      "image": "graph/pgs-ts-nguyen-dang-ho-hai.jpg",
+      "type": "giang-vien",
+      "is_management": false,
+      "roles": [],
+      "department": "toan-ly-thuyet",
+      "department_name": "Bộ môn Toán Lý thuyết",
+      "contact": { "email": "nguyendanghohai@gmail.com", "phone": "" },
+      "education": [
+        { "level": "Đại học", "major": "Toán học", "place": "Trường Đại học Khoa học, Đại học Huế", "year": "2003" },
+        { "level": "Thạc sĩ", "major": "Toán học", "place": "Đại học Paris 13, Pháp", "year": "2006" },
+        { "level": "Tiến sĩ", "major": "Toán học", "place": "Đại học Paris 13, Pháp", "year": "2010" }
+      ],
+      "research_fields": ["Tô-pô đại số", "Lý thuyết biểu diễn"],
+      "science_url": "https://csdlkhoahoc.hueuni.edu.vn/index.php/scientist/detail/id/327"
+    },
+    {
+      "id": "ths-bui-van-hieu",
+      "name": "ThS. Bùi Văn Hiếu",
+      "gender": "Nam",
+      "birthday": "1983",
+      "title": "Giảng viên",
+      "image": "graph/ths-bui-van-hieu.jpg",
+      "type": "giang-vien",
+      "is_management": false,
+      "roles": [],
+      "department": "toan-ly-thuyet",
+      "department_name": "Bộ môn Toán Lý thuyết",
+      "contact": { "email": "buivanhieu@husc.edu.vn", "phone": "0983.059.359" },
+      "education": [
+        { "level": "Đại học", "major": "Toán học", "place": "Trường Đại học Khoa học, Đại học Huế", "year": "2004" },
+        { "level": "Thạc sĩ", "major": "Toán học (Toán giải tích)", "place": "Trường Đại học Khoa học, Đại học Huế", "year": "2009" }
+      ],
+      "research_fields": ["Lý thuyết tối ưu", "Khoa học dữ liệu", "Xử lý ngôn ngữ tự nhiên"],
+      "teaching_fields": ["Toán học", "Công nghệ Thông tin và truyền thông"],
+      "science_url": "https://csdlkhoahoc.hueuni.edu.vn/index.php/scientist/detail/id/325"
+    },
+    {
+      "id": "ts-nguyen-duy-ai-nhan",
+      "name": "TS. Nguyễn Duy Ái Nhân",
+      "gender": "Nữ",
+      "birthday": "1989",
+      "title": "Giảng viên",
+      "image": "graph/ts-nguyen-duy-ai-nhan.jpg",
+      "type": "giang-vien",
+      "is_management": false,
+      "roles": [],
+      "department": "toan-ly-thuyet",
+      "department_name": "Bộ môn Toán Lý thuyết",
+      "contact": { "email": "nguyenduyainhan@husc.edu.vn", "phone": "" },
+      "education": [
+        { "level": "Đại học", "major": "Sư phạm Toán học", "place": "Trường Đại học Sư phạm, Đại học Huế", "year": "2011" },
+        { "level": "Thạc sĩ", "major": "Đại số và Lý thuyết số", "place": "Trường Đại học Sư phạm, Đại học Huế", "year": "2013" },
+        { "level": "Tiến sĩ", "major": "Đại số và Lý thuyết số", "place": "Trường ĐH Khoa học Tự nhiên, ĐHQG HCM", "year": "2026" }
+      ],
+      "research_fields": ["Đại số và Lý thuyết số"],
+      "teaching_fields": ["Đại số"],
+      "science_url": "https://csdlkhoahoc.hueuni.edu.vn/index.php/scientist/detail/id/3258"
+    },
+    {
+      "id": "ths-chau-thanh-hai",
+      "name": "ThS. Châu Thanh Hải",
+      "gender": "Nam",
+      "birthday": "1978",
+      "title": "Giảng viên",
+      "image": "graph/ths-chau-thanh-hai.jpg",
+      "type": "giang-vien",
+      "is_management": false,
+      "roles": [],
+      "department": "toan-ly-thuyet",
+      "department_name": "Bộ môn Toán Lý thuyết",
+      "contact": { "email": "", "phone": "0935.961.321" },
+      "education": [
+        { "level": "Đại học", "major": "Toán học", "place": "Trường Đại học Sư phạm, Đại học Huế", "year": "2000" },
+        { "level": "Thạc sĩ", "major": "Toán học", "place": "Trường Đại học Sư phạm, Đại học Huế", "year": "2004" }
+      ],
+      "research_fields": ["Toán học"],
+      "science_url": "https://csdlkhoahoc.hueuni.edu.vn/index.php/scientist/detail/id/318"
+    },
+    {
+      "id": "ths-ho-vu-ngoc-phuong",
+      "name": "ThS. Hồ Vũ Ngọc Phương",
+      "gender": "Nữ",
+      "birthday": "1986",
+      "title": "Giảng viên",
+      "image": "graph/ths-ho-vu-ngoc-phuong.jpg",
+      "type": "giang-vien",
+      "is_management": false,
+      "roles": [],
+      "department": "toan-ly-thuyet",
+      "department_name": "Bộ môn Toán Lý thuyết",
+      "contact": { "email": "hvngocphuong@gmail.com", "phone": "" },
+      "education": [
+        { "level": "Đại học", "major": "Toán học", "place": "Trường Đại học Khoa học, Đại học Huế", "year": "2009" },
+        { "level": "Thạc sĩ", "major": "Toán học (Lý thuyết tối ưu)", "place": "Trường Đại học Khoa học, Đại học Huế", "year": "2012" }
+      ],
+      "research_fields": ["Lý thuyết tối ưu"],
+      "science_url": "https://csdlkhoahoc.hueuni.edu.vn/index.php/scientist/detail/id/3295"
+    },
+    {
+      "id": "ts-pham-le-my",
+      "name": "TS. Phạm Lệ Mỹ",
+      "gender": "Nữ",
+      "birthday": "1975",
+      "title": "Giảng viên",
+      "image": "graph/ts-pham-le-my.jpg",
+      "type": "giang-vien",
+      "is_management": false,
+      "roles": [],
+      "department": "xac-suat-thong-ke",
+      "department_name": "Bộ môn Xác suất Thống kê",
+      "contact": { "email": "phamlemy2006@gmail.com", "phone": "" },
+      "education": [
+        { "level": "Đại học", "major": "Toán học", "place": "Trường Đại học Khoa học, Đại học Huế", "year": "1997" },
+        { "level": "Thạc sĩ", "major": "Toán học", "place": "Viện Toán học Hà Nội", "year": "2003" },
+        { "level": "Tiến sĩ", "major": "Kinh tế", "place": "Trường Đại học Kinh tế Quốc dân", "year": "2017" }
+      ],
+      "research_fields": ["Toán học", "Lý thuyết xác suất và thống kê toán học"],
+      "teaching_fields": ["Xác suất Thống kê"],
+      "science_url": "https://csdlkhoahoc.hueuni.edu.vn/index.php/scientist/detail/id/343"
+    },
+    {
+      "id": "ts-bui-quang-vu",
+      "name": "TS. Bùi Quang Vũ",
+      "gender": "Nam",
+      "birthday": "1980",
+      "title": "Giảng viên",
+      "image": "graph/ts-bui-quang-vu.jpg",
+      "type": "giang-vien",
+      "is_management": false,
+      "roles": [],
+      "department": "xac-suat-thong-ke",
+      "department_name": "Bộ môn Xác suất Thống kê",
+      "contact": { "email": "buiquangvu@hueuni.edu.vn", "phone": "0914.145.085" },
+      "education": [
+        { "level": "Đại học", "major": "Toán học", "place": "Trường Đại học Khoa học, Đại học Huế", "year": "2002" },
+        { "level": "Thạc sĩ", "major": "Toán học", "place": "Trường Đại học Khoa học, Đại học Huế", "year": "2007" },
+        { "level": "Tiến sĩ", "major": "Thống kê", "place": "Pháp", "year": "2018" }
+      ],
+      "research_fields": ["Toán học", "Thống kê", "Khoa học dữ liệu", "Học máy"],
+      "teaching_fields": ["Thống kê", "Khoa học máy tính", "Khoa học dữ liệu", "Trí tuệ nhân tạo", "Học máy"],
+      "science_url": "https://csdlkhoahoc.hueuni.edu.vn/index.php/scientist/detail/id/346"
+    },
+    {
+      "id": "ths-vo-quang-man",
+      "name": "ThS. Võ Quang Mẫn",
+      "gender": "Nam",
+      "birthday": "1981",
+      "title": "Giảng viên",
+      "image": "graph/ths-vo-quang-man.jpg",
+      "type": "giang-vien",
+      "is_management": false,
+      "roles": [],
+      "department": "xac-suat-thong-ke",
+      "department_name": "Bộ môn Xác suất Thống kê",
+      "contact": { "email": "", "phone": "0988.858.559" },
+      "education": [
+        { "level": "Đại học", "major": "Toán học", "place": "Trường Đại học Khoa học, Đại học Huế", "year": "2004" },
+        { "level": "Thạc sĩ", "major": "Toán học (Lý thuyết xác suất và thống kê toán học)", "place": "Trường Đại học Khoa học, Đại học Huế", "year": "2011" }
+      ],
+      "research_fields": ["Toán học", "Lý thuyết xác suất và thống kê toán học"],
+      "teaching_fields": ["Xác suất Thống kê"],
+      "science_url": "https://csdlkhoahoc.hueuni.edu.vn/index.php/scientist/detail/id/342"
+    },
+    {
+      "id": "ths-tran-thien-thanh",
+      "name": "ThS. Trần Thiện Thành",
+      "gender": "Nam",
+      "birthday": "1983",
+      "title": "Giảng viên",
+      "image": "graph/ths-tran-thien-thanh.jpg",
+      "type": "giang-vien",
+      "is_management": false,
+      "roles": ["tl-to-chuc-nckh"],
+      "department": "xac-suat-thong-ke",
+      "department_name": "Bộ môn Xác suất Thống kê",
+      "contact": { "email": "thanhtt.math@gmail.com", "phone": "" },
+      "education": [
+        { "level": "Đại học", "major": "Toán học", "place": "Trường Đại học Khoa học, Đại học Huế", "year": "2005" },
+        { "level": "Thạc sĩ", "major": "Toán học (Lý thuyết xác suất và thống kê toán học)", "place": "Trường Đại học Khoa học, Đại học Huế", "year": "2008" }
+      ],
+      "research_fields": ["Toán học", "Lý thuyết xác suất và thống kê toán học"],
+      "teaching_fields": ["Xác suất Thống kê"],
+      "science_url": "https://csdlkhoahoc.hueuni.edu.vn/index.php/scientist/detail/id/345"
+    },
+    {
+      "id": "ths-nguyen-du-thai",
+      "name": "ThS. Nguyễn Dư Thái",
+      "gender": "Nam",
+      "birthday": "1982",
+      "title": "Giảng viên",
+      "image": "graph/ths-nguyen-du-thai.jpg",
+      "type": "giang-vien",
+      "is_management": false,
+      "roles": [],
+      "department": "xac-suat-thong-ke",
+      "department_name": "Bộ môn Xác suất Thống kê",
+      "contact": { "email": "nguyenduthai@husc.edu.vn", "phone": "0905.998.369" },
+      "education": [
+        { "level": "Đại học", "major": "Toán học", "place": "Trường Đại học Khoa học, Đại học Huế", "year": "2005" },
+        { "level": "Thạc sĩ", "major": "Toán học", "place": "Trường Đại học Khoa học, Đại học Huế", "year": "2008" }
+      ],
+      "research_fields": ["Toán học"],
+      "teaching_fields": ["Toán học"],
+      "science_url": "https://csdlkhoahoc.hueuni.edu.vn/index.php/scientist/detail/id/322"
+    }
+  ]
+}
