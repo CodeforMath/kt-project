@@ -274,15 +274,31 @@ p {
 .card-divider .dot { width: 10px; height: 10px; background: var(--w3-green); border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
 .card-text { color: #444; font-size: 1rem; text-align: justify; }
 
-.about-department-section {padding: 60px 0; background-color: #ffffff; }
-.grid-about { display: flex; gap: 60px; align-items: center; }
-.about-content { flex: 1; }
-.about-image { flex: 0.9; }
+.about-department-section {
+    padding: 60px 0; 
+    background-color: #ffffff; 
+}
+
+/* Giao diện chuẩn trên Máy tính */
+.grid-about { 
+    display: flex; 
+    gap: 50px; 
+    align-items: center; 
+}
+.about-content { 
+    flex: 1; 
+}
+.about-image { 
+    width: 100%; 
+    height: 100%; 
+    object-fit: cover; 
+    transition: transform 0.6s ease;
+}
 .section-subtitle { color: var(--w3-green); font-size: 1rem; font-weight: 700; letter-spacing: 2px; margin-bottom: 10px; }
 .section-title { color: var(--husc-blue-dark); font-size: 2.5rem; font-weight: 800; margin-bottom: 20px; }
 .title-line { width: 60px; height: 4px; background: var(--w3-green); margin-bottom: 30px; }
 .about-description { color: #555; font-size: 1.1rem; line-height: 1.8; margin-bottom: 25px; text-align: justify; }
-.about-features {padding-left: 30px; list-style: none; margin-bottom: 35px; }
+.about-features { padding-left: 0; list-style: none; margin-bottom: 35px; } /* Bỏ padding-left quá rộng */
 .about-features li { margin-bottom: 12px; color: #333; font-weight: 500; display: flex; align-items: center; gap: 12px; }
 .about-features li i { color: var(--w3-green); font-size: 1.2rem; }
 /* Class định nghĩa giao diện chung cho mọi nút bấm hành động */
@@ -331,22 +347,17 @@ p {
 }
 /* CSS cho container chứa ảnh, dùng để căn giữa */
 .about-image-container {
-    width: 80%;
-    aspect-ratio: 16 / 9; /* Giữ ảnh luôn ở tỉ lệ ngang đẹp mắt */
+    flex: 1; 
+    width: 80%; /* Giảm chiều rộng khung chứa xuống còn 80% */
+    max-width: 900px; /* Thêm giới hạn để ảnh không bị quá to trên màn hình cực lớn */
+    margin: 20px auto; /* Căn giữa khung ảnh đều hai bên */
+    aspect-ratio: 16 / 9; 
     overflow: hidden; 
     border-radius: 20px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    margin: 20px auto;
 }
 
-.about-image { 
-    width: 100%; 
-    height: 100%; 
-    object-fit: cover; /* Tự động cắt ảnh vừa khít khung mà không bị méo */
-    transition: transform 0.6s ease;
-}
 
-/* Hiệu ứng zoom áp dụng cho TẤT CẢ ảnh dùng chung class */
 .about-image-container:hover .about-image {
     transform: scale(1.1);
 }
@@ -381,7 +392,7 @@ p {
 
 /* Đường phân cách giữa các section */
 .section-divider {
-    height: 2px; /* Giảm độ dày một chút cho thanh lịch */
+    height:5px; /* Giảm độ dày một chút cho thanh lịch */
     width: 100%;
     max-width: 900px; /* Giữ tối đa 900px trên PC, nhưng tự co lại trên Mobile */
     margin: 30px auto; /* Tăng khoảng cách trên dưới cho thoáng rộng */
@@ -837,6 +848,35 @@ p {
     }
     .profile-grid-sub {
         grid-template-columns: 1fr;
+    }
+    .grid-about { 
+        flex-direction: column !important; /* Buộc chuyển từ hàng ngang thành hàng dọc */
+        gap: 35px !important;
+        padding: 0 20px !important;
+    }
+    
+    .about-content, .about-image-container {
+        width: 100% !important; /* Ép cả khối chữ và khối ảnh rộng hết màn hình */
+        flex: none !important;
+    }
+    
+    .section-title {
+        font-size: 1.8rem !important; /* Thu nhỏ tiêu đề tránh rớt chữ đột ngột */
+        margin-bottom: 15px;
+    }
+    
+    .title-line {
+        margin-bottom: 20px;
+    }
+    
+    .about-description {
+        font-size: 1rem !important; /* Cỡ chữ vừa vặn dễ đọc trên màn hình nhỏ */
+        line-height: 1.6;
+    }
+
+    .about-image-container {
+        height: 220px !important; /* Cố định chiều cao ảnh trên mobile cho cân đối */
+        border-radius: 12px; /* Bo góc nhẹ hơn cho hợp màn hình điện thoại */
     }
 }
 /* Responsive cho iPhone */
