@@ -314,7 +314,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Hàm hỗ trợ lấy tên tiếng Việt của thư mục để hiển thị nhãn (Tag)
     const getVNCategory = (cat) => {
-        const map = {'tin-tuc':'Tin tức', 'thong-bao':'Thông báo', 'hoc-bong':'Học bổng', 'doan-hoi':'Đoàn - Hội'};
+        const map = {'tin-tuc':'Tin tức', 'thong-bao':'Thông báo', 'hoc-bong':'Học bổng', 'doan-hoi':'Đoàn hội'};
         return map[cat] || 'Tin tức';
     };
 
