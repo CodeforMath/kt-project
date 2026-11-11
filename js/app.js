@@ -5,8 +5,8 @@
  * - Chuyển trang không cần tải lại toàn bộ (chỉ thay phần <main id="main-content">).
  *
  * Người cập nhật nội dung thường KHÔNG cần sửa file này:
- *   - Thêm/sửa bài viết  -> dùng admin/index.html (hoặc sửa data/data.json)
- *   - Thêm/sửa cán bộ    -> sửa data/staff.json
+ *   - Thêm/sửa bài viết, cán bộ -> dùng trang quản trị admin/index.html
+ *     (dữ liệu nằm trong data/data.json và data/staff.json)
  *   - Sửa menu, chân trang -> sửa js/layout.js
  * Xem thêm HUONG-DAN.md.
  */
@@ -169,7 +169,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     { id: 'xac-suat-thong-ke', label: 'Bộ môn Xác suất - Thống kê' }
                 ];
                 depts.forEach(dept => {
-                    const deptStaff = s.filter(i => i.department === dept.id);
+                    const deptStaff = s.filter(i => i.department === dept.id && i.type === 'giang-vien');
                     if (!deptStaff.length) return;
                     const leader = deptStaff.find(i => i.roles?.includes('truong-bo-mon'));
                     const members = deptStaff.filter(i => !i.roles?.includes('truong-bo-mon'));
@@ -243,8 +243,10 @@ document.addEventListener('DOMContentLoaded', function () {
                         </ul>
                         <h6 class="spec-title">2. Kinh nghiệm giảng dạy</h6>
                         <ul id="gv-teaching-list" class="dot-list-small">
-                            <li>Các học phần Toán cơ bản.</li>
-                            <li>Các học phần chuyên ngành thuộc ${p.department_name || 'Toán học'}.</li>
+                            ${p.teaching_fields?.length
+                                ? p.teaching_fields.map(f => `<li>${f}</li>`).join('')
+                                : `<li>Các học phần Toán cơ bản.</li>
+                                   <li>Các học phần chuyên ngành thuộc ${p.department_name || 'Toán học'}.</li>`}
                         </ul>
                         <h6 class="spec-title">3. Dữ liệu khoa học</h6>
                         <div class="science-link-wrapper">

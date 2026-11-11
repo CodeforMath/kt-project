@@ -3,452 +3,1115 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý bài viết - Khoa Toán HUSC</title>
+    <title>Quản trị website - Khoa Toán HUSC</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --primary: #004488; --primary-dark: #002d5a; --danger: #dc3545; --success: #1e8e3e; --border: #dde3ea; --muted: #667; }
+        :root { --primary: #004488; --danger: #c82333; --success: #1e8e3e; --border: #dde3ea; --muted: #667; --warn-bg: #fff4d6; --warn: #7a5600; }
         * { box-sizing: border-box; }
+        [hidden] { display: none !important; }
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f4f7f9; margin: 0; padding: 20px; color: #333; }
         .wrap { max-width: 1150px; margin: auto; }
         header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; }
         h1 { color: var(--primary); font-size: 1.5rem; margin: 0; }
         .card { background: #fff; border-radius: 12px; box-shadow: 0 3px 15px rgba(0,0,0,.07); padding: 22px; margin-bottom: 18px; }
-        .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
-        .step { background: #eef3f9; padding: 12px 14px; border-radius: 8px; border-left: 4px solid var(--primary); font-size: 14px; line-height: 1.5; }
-        .step b { color: var(--primary); display: block; margin-bottom: 4px; }
+        .card h2 { margin: 0 0 12px; font-size: 1.15rem; color: var(--primary); }
+        ol.guide { margin: 0; padding-left: 22px; line-height: 1.9; }
         code { background: #e8edf3; padding: 1px 5px; border-radius: 4px; font-size: 13px; }
+        .folder-badge { background: #e3f5e8; color: #17692f; padding: 6px 12px; border-radius: 16px; font-size: 14px; font-weight: 600; }
 
-        .btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 16px; border: 1px solid transparent; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; background: #e9eef4; color: #333; }
+        .btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 16px; border: 1px solid transparent; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; background: #e9eef4; color: #333; text-decoration: none; font-family: inherit; }
         .btn:hover { filter: brightness(.95); }
         .btn-primary { background: var(--primary); color: #fff; }
         .btn-success { background: var(--success); color: #fff; }
         .btn-danger { background: #fff; color: var(--danger); border-color: #f1b8be; }
+        .btn-big { padding: 14px 26px; font-size: 16px; }
         .btn-sm { padding: 5px 10px; font-size: 13px; }
-        .btn:disabled { opacity: .5; cursor: not-allowed; }
+        .btn:disabled { opacity: .4; cursor: not-allowed; }
 
         .status { padding: 10px 14px; border-radius: 8px; font-size: 14px; margin-bottom: 14px; }
         .status.info { background: #e8f1fb; color: #0b4a85; }
-        .status.warn { background: #fff4d6; color: #7a5600; }
+        .status.warn { background: var(--warn-bg); color: var(--warn); }
         .status.ok { background: #e3f5e8; color: #17692f; }
-        .upload-area { border: 2px dashed #c4ccd6; padding: 24px; text-align: center; border-radius: 10px; }
-        .upload-area.drag { border-color: var(--primary); background: #f0f7ff; }
+        .status.err { background: #fde8ea; color: #8a1520; }
+
+        .pending { background: var(--warn-bg); border: 1px solid #f0d48a; }
+        .pending h2 { color: var(--warn); }
+        .pending ul { margin: 8px 0 14px; padding-left: 22px; columns: 2; }
+        .pending li { font-family: Consolas, monospace; font-size: 14px; }
+
+        .tabs { display: flex; gap: 4px; border-bottom: 2px solid var(--border); margin-bottom: 16px; }
+        .tab { padding: 10px 20px; border: none; background: none; cursor: pointer; font-size: 15px; font-weight: 600; color: var(--muted); border-bottom: 3px solid transparent; margin-bottom: -2px; font-family: inherit; }
+        .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
 
         .toolbar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
         .toolbar select, .toolbar input { padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; }
         .toolbar input { flex: 1; min-width: 180px; }
-        .spacer { flex: 1; }
         table { width: 100%; border-collapse: collapse; }
         th { background: var(--primary); color: #fff; padding: 10px; text-align: left; font-size: 14px; }
-        td { padding: 10px; border-bottom: 1px solid #eee; font-size: 14px; vertical-align: middle; }
+        td { padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 14px; vertical-align: middle; }
         td.actions { white-space: nowrap; text-align: right; }
         tr:hover td { background: #fafcff; }
         .thumb { width: 64px; height: 44px; object-fit: cover; border-radius: 4px; background: #eee; display: block; }
-        .tag { padding: 3px 8px; border-radius: 10px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+        .avatar { width: 44px; height: 56px; object-fit: cover; border-radius: 4px; background: #e6ecf2; display: block; }
+        .missing-img { font-size: 11px; color: var(--danger); }
+        .tag { padding: 3px 8px; border-radius: 10px; font-size: 11px; font-weight: 700; white-space: nowrap; display: inline-block; margin: 1px 0; }
         .tag-tin-tuc { background: #d1ecf1; color: #0c5460; }
         .tag-thong-bao { background: #fff3cd; color: #856404; }
         .tag-hoc-bong { background: #d4edda; color: #155724; }
         .tag-doan-hoi { background: #f3dcf5; color: #6b1f73; }
+        .tag-role { background: #e8eef6; color: #234; }
         .empty { text-align: center; color: var(--muted); padding: 30px; }
-        .dirty-badge { background: #fff4d6; color: #7a5600; padding: 4px 10px; border-radius: 12px; font-size: 13px; font-weight: 600; }
 
-        /* Form soạn bài */
-        dialog { width: min(1100px, 96vw); max-height: 94vh; border: none; border-radius: 12px; padding: 0; box-shadow: 0 10px 40px rgba(0,0,0,.25); }
+        dialog { width: min(1100px, 96vw); max-height: 94vh; overflow: auto; border: none; border-radius: 12px; padding: 0; box-shadow: 0 10px 40px rgba(0,0,0,.25); }
+        dialog.narrow { width: min(760px, 96vw); }
         dialog::backdrop { background: rgba(0,20,40,.45); }
-        .dlg-head { display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: #fff; z-index: 1; }
+        .dlg-head { display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: #fff; z-index: 2; }
         .dlg-head h2 { margin: 0; font-size: 1.15rem; color: var(--primary); }
-        .dlg-body { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 20px; }
-        .dlg-foot { display: flex; justify-content: flex-end; gap: 10px; padding: 14px 20px; border-top: 1px solid var(--border); position: sticky; bottom: 0; background: #fff; }
+        .dlg-body { padding: 20px; }
+        .dlg-body.split { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .dlg-foot { display: flex; justify-content: flex-end; gap: 10px; padding: 14px 20px; border-top: 1px solid var(--border); position: sticky; bottom: 0; background: #fff; z-index: 2; }
         .field { margin-bottom: 14px; }
-        .field label { display: block; font-weight: 600; color: var(--primary); margin-bottom: 5px; font-size: 14px; }
-        .field input, .field select, .field textarea { width: 100%; padding: 9px 11px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; font-family: inherit; }
+        .field > label, .field-label { display: block; font-weight: 600; color: var(--primary); margin-bottom: 5px; font-size: 14px; }
+        .field input[type=text], .field input[type=date], .field input[type=email], .field input[type=url], .field select, .field textarea { width: 100%; padding: 9px 11px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; font-family: inherit; }
         .field textarea { resize: vertical; }
-        .field input:invalid:not(:placeholder-shown) { border-color: var(--danger); }
         .hint { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
         .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+        .checks { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 16px; font-size: 14px; }
+        .checks label { display: flex; gap: 6px; align-items: center; cursor: pointer; }
+        .image-picker { display: flex; gap: 14px; align-items: center; }
+        .image-picker img { width: 120px; height: 80px; object-fit: cover; border-radius: 6px; background: #eee; border: 1px solid var(--border); }
+        .image-picker.portrait img { width: 90px; height: 115px; }
+        .edu-block { border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px 0; margin-bottom: 10px; }
+        .edu-block b { display: block; margin-bottom: 8px; color: #333; font-size: 14px; }
         .editor-tools { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 6px; }
         .preview-box { border: 1px solid var(--border); border-radius: 8px; padding: 16px; background: #fff; overflow: auto; max-height: 70vh; }
         .preview-box h3 { margin-top: 0; color: #002d62; }
         .preview-box img { max-width: 100%; border-radius: 6px; }
         .preview-label { font-size: 12px; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); margin-bottom: 6px; font-weight: 700; }
-        .img-preview { margin-top: 8px; max-height: 120px; max-width: 100%; border-radius: 6px; display: none; }
+        /* Hướng dẫn */
+        .guide-body { display: grid; grid-template-columns: 210px 1fr; gap: 24px; padding: 20px; }
+        .guide-toc { position: sticky; top: 70px; align-self: start; font-size: 14px; }
+        .guide-toc a { display: block; padding: 6px 10px; border-radius: 6px; color: #334; text-decoration: none; }
+        .guide-toc a:hover { background: #eef3f9; color: var(--primary); }
+        .guide-content { font-size: 15px; line-height: 1.7; }
+        .guide-content h3 { color: var(--primary); margin: 28px 0 8px; font-size: 1.1rem; scroll-margin-top: 70px; }
+        .guide-content h3:first-child { margin-top: 0; }
+        .guide-content ol, .guide-content ul { padding-left: 22px; margin: 6px 0; }
+        .guide-content li { margin: 3px 0; }
+        .guide-content table { margin: 8px 0; }
+        .guide-content td { font-size: 14px; vertical-align: top; }
+        .guide-content .note { background: var(--warn-bg); color: var(--warn); padding: 10px 14px; border-radius: 8px; margin: 10px 0; font-size: 14px; }
+        .guide-content .tip { background: #e8f1fb; color: #0b4a85; padding: 10px 14px; border-radius: 8px; margin: 10px 0; font-size: 14px; }
+        .guide-content kbd { background: #fff; border: 1px solid #ccd; border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; font-size: 13px; }
+        @media (max-width: 800px) { .guide-body { grid-template-columns: 1fr; } .guide-toc { position: static; } }
+        .busy { position: fixed; inset: 0; background: rgba(255,255,255,.6); display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--primary); z-index: 100; }
         @media (max-width: 800px) {
-            .dlg-body { grid-template-columns: 1fr; }
-            .row2 { grid-template-columns: 1fr; }
-            th:nth-child(1), td:nth-child(1) { display: none; }
+            .dlg-body.split, .row2, .row3, .checks { grid-template-columns: 1fr; }
+            .pending ul { columns: 1; }
         }
     </style>
 </head>
 <body>
 <div class="wrap">
     <header>
-        <h1><i class="fas fa-newspaper"></i> Quản lý bài viết - Khoa Toán</h1>
-        <a href="../index.html" class="btn"><i class="fas fa-arrow-left"></i> Về trang chủ</a>
+        <h1><i class="fas fa-screwdriver-wrench"></i> Quản trị website Khoa Toán</h1>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <span id="folderBadge" class="folder-badge" hidden></span>
+            <button id="btnChangeFolder" class="btn btn-sm" hidden><i class="fas fa-folder-open"></i> Đổi thư mục</button>
+            <button id="btnGuide" class="btn btn-sm btn-primary"><i class="fas fa-circle-question"></i> Hướng dẫn</button>
+        </div>
     </header>
 
-    <div class="card">
-        <div class="steps">
-            <div class="step"><b>1. Mở dữ liệu</b>Trang này tự đọc <code>data/data.json</code>. Nếu không được, kéo thả file đó vào ô bên dưới.</div>
-            <div class="step"><b>2. Thêm / sửa / xóa bài</b>Ảnh của bài phải được chép trước vào thư mục <code>graph/</code>.</div>
-            <div class="step"><b>3. Tải file về</b>Bấm <b>"Tải data.json"</b> rồi chép đè file vào thư mục <code>data/</code> của website.</div>
+    <div id="status" class="status info" hidden></div>
+
+    <!-- Màn hình bắt đầu -->
+    <div id="connectCard" class="card">
+        <h2>Bắt đầu</h2>
+        <div id="unsupported" class="status err" hidden></div>
+        <div id="connectArea">
+            <ol class="guide">
+                <li>Bấm nút bên dưới và chọn <b>thư mục website</b> trên máy tính (thư mục có <code>index.html</code>, <code>data</code>, <code>graph</code>...).</li>
+                <li>Trình duyệt hỏi quyền sửa file → bấm <b>"Cho phép" / "Lưu thay đổi"</b>.</li>
+                <li>Thêm, sửa bài viết hoặc cán bộ. Mọi thay đổi được <b>lưu ngay</b> vào thư mục đó.</li>
+                <li>Dùng <b>FileZilla</b> tải những file được liệt kê ở khung màu vàng lên máy chủ.</li>
+            </ol>
+            <p style="margin:10px 0 0;font-size:14px">Lần đầu sử dụng? Bấm <a href="#" onclick="openGuide();return false"><b>Hướng dẫn</b></a> để xem chi tiết từng bước.</p>
+            <p style="margin:18px 0 0;display:flex;gap:10px;flex-wrap:wrap">
+                <button id="btnReopen" class="btn btn-primary btn-big" hidden></button>
+                <button id="btnPickFolder" class="btn btn-primary btn-big"><i class="fas fa-folder-open"></i> Chọn thư mục website</button>
+            </p>
         </div>
     </div>
 
-    <div class="card">
-        <div id="status" class="status info">Đang đọc dữ liệu...</div>
-        <div class="upload-area" id="dropZone" hidden>
-            <p style="margin-top:0">Kéo thả file <b>data.json</b> (trong thư mục <code>data/</code>) vào đây, hoặc</p>
-            <input type="file" id="fileInput" accept=".json,application/json">
+    <!-- Danh sách file cần tải lên -->
+    <div id="pendingCard" class="card pending" hidden>
+        <h2><i class="fas fa-cloud-arrow-up"></i> Cần tải lên máy chủ bằng FileZilla</h2>
+        <div style="font-size:14px">Trong FileZilla, kéo các file sau từ máy bạn (khung bên trái) sang <b>đúng thư mục tương ứng</b> trên máy chủ (khung bên phải), chọn <b>Ghi đè (Overwrite)</b> nếu được hỏi:</div>
+        <ul id="pendingList"></ul>
+        <button id="btnUploaded" class="btn btn-success"><i class="fas fa-check"></i> Tôi đã tải lên xong</button>
+    </div>
+
+    <!-- Khu vực làm việc -->
+    <div id="workspace" class="card" hidden>
+        <div class="tabs">
+            <button class="tab active" data-tab="news"><i class="fas fa-newspaper"></i> Bài viết</button>
+            <button class="tab" data-tab="staff"><i class="fas fa-users"></i> Cán bộ</button>
         </div>
 
-        <div id="manager" hidden>
+        <section id="tab-news">
             <div class="toolbar">
-                <button class="btn btn-primary" id="btnNew"><i class="fas fa-plus"></i> Viết bài mới</button>
+                <button class="btn btn-primary" id="btnNewPost"><i class="fas fa-plus"></i> Viết bài mới</button>
                 <select id="filterCat" aria-label="Lọc chuyên mục"><option value="">Tất cả chuyên mục</option></select>
-                <input type="search" id="search" placeholder="Tìm theo tiêu đề...">
-                <span id="dirtyBadge" class="dirty-badge" hidden>Có thay đổi chưa tải về</span>
-                <button class="btn btn-success" id="btnExport"><i class="fas fa-download"></i> Tải data.json</button>
+                <input type="search" id="searchPost" placeholder="Tìm theo tiêu đề...">
             </div>
             <table>
-                <thead><tr><th style="width:80px">Ảnh</th><th style="width:105px">Ngày</th><th style="width:110px">Chuyên mục</th><th>Tiêu đề</th><th style="width:150px"></th></tr></thead>
-                <tbody id="tableBody"></tbody>
+                <thead><tr><th style="width:80px">Ảnh</th><th style="width:105px">Ngày</th><th style="width:110px">Chuyên mục</th><th>Tiêu đề</th><th style="width:140px"></th></tr></thead>
+                <tbody id="newsBody"></tbody>
             </table>
-        </div>
+        </section>
+
+        <section id="tab-staff" hidden>
+            <div class="toolbar">
+                <button class="btn btn-primary" id="btnNewStaff"><i class="fas fa-user-plus"></i> Thêm cán bộ</button>
+                <input type="search" id="searchStaff" placeholder="Tìm theo tên...">
+            </div>
+            <p class="hint" style="margin-top:0">Thứ tự trong bảng là thứ tự hiển thị trên web. Dùng nút <i class="fas fa-arrow-up"></i> <i class="fas fa-arrow-down"></i> để sắp xếp.</p>
+            <table>
+                <thead><tr><th style="width:60px">Ảnh</th><th>Họ tên</th><th>Bộ môn</th><th>Chức vụ</th><th style="width:210px"></th></tr></thead>
+                <tbody id="staffBody"></tbody>
+            </table>
+        </section>
     </div>
 </div>
 
-<!-- Hộp soạn bài -->
-<dialog id="editor">
-    <form id="postForm" method="dialog">
+<!-- ============ HỘP SOẠN BÀI VIẾT ============ -->
+<dialog id="postEditor">
+    <form id="postForm">
         <div class="dlg-head">
-            <h2 id="editorTitle">Viết bài mới</h2>
+            <h2 id="postEditorTitle">Viết bài mới</h2>
             <button type="button" class="btn btn-sm" data-close aria-label="Đóng"><i class="fas fa-times"></i></button>
         </div>
-        <div class="dlg-body">
+        <div class="dlg-body split">
             <div>
                 <div class="row2">
                     <div class="field">
-                        <label for="fCat">Chuyên mục</label>
-                        <select id="fCat" required></select>
+                        <label for="pCat">Chuyên mục</label>
+                        <select id="pCat" required></select>
                     </div>
                     <div class="field">
-                        <label for="fDate">Ngày đăng</label>
-                        <input type="date" id="fDate" required>
+                        <label for="pDate">Ngày đăng</label>
+                        <input type="date" id="pDate" required>
                     </div>
                 </div>
                 <div class="field">
-                    <label for="fTitle">Tiêu đề *</label>
-                    <input type="text" id="fTitle" required placeholder="Ví dụ: Lễ trao bằng tốt nghiệp năm 2026">
+                    <label for="pTitle">Tiêu đề *</label>
+                    <input type="text" id="pTitle" required placeholder="Ví dụ: Lễ trao bằng tốt nghiệp năm 2026">
                 </div>
                 <div class="field">
-                    <label for="fImage">Ảnh đại diện</label>
-                    <input type="text" id="fImage" placeholder="ten-anh.jpg" list="imageList">
-                    <div class="hint">Gõ tên file ảnh trong thư mục <code>graph/</code> (vd. <code>tin-tuc-000005.jpg</code>). Nên đặt tên không dấu, không khoảng trắng.</div>
-                    <img id="fImagePreview" class="img-preview" alt="Xem trước ảnh">
+                    <span class="field-label">Ảnh đại diện</span>
+                    <div class="image-picker">
+                        <img id="pImagePreview" alt="">
+                        <div>
+                            <label class="btn btn-sm"><i class="fas fa-image"></i> Chọn ảnh...
+                                <input type="file" id="pImageFile" accept="image/*" hidden></label>
+                            <div class="hint" id="pImageName">Chưa có ảnh</div>
+                        </div>
+                    </div>
+                    <div class="hint">Chọn ảnh bất kỳ trên máy. Ảnh sẽ được tự động thu nhỏ và đặt tên.</div>
                 </div>
                 <div class="field">
-                    <label for="fExcerpt">Tóm tắt *</label>
-                    <textarea id="fExcerpt" rows="2" required placeholder="1-2 câu hiển thị ở trang danh sách và trang chủ"></textarea>
+                    <label for="pExcerpt">Tóm tắt *</label>
+                    <textarea id="pExcerpt" rows="2" required placeholder="1-2 câu, hiển thị ở trang chủ và trang danh sách"></textarea>
                 </div>
                 <div class="field">
-                    <label for="fContent">Nội dung</label>
+                    <label for="pContent">Nội dung</label>
                     <div class="editor-tools">
-                        <button type="button" class="btn btn-sm" data-wrap="strong" title="In đậm phần chữ đang chọn"><i class="fas fa-bold"></i></button>
-                        <button type="button" class="btn btn-sm" data-wrap="em" title="In nghiêng phần chữ đang chọn"><i class="fas fa-italic"></i></button>
-                        <button type="button" class="btn btn-sm" id="btnInsertImg"><i class="fas fa-image"></i> Chèn ảnh</button>
+                        <button type="button" class="btn btn-sm" data-wrap="strong" title="In đậm chữ đang chọn"><i class="fas fa-bold"></i></button>
+                        <button type="button" class="btn btn-sm" data-wrap="em" title="In nghiêng chữ đang chọn"><i class="fas fa-italic"></i></button>
+                        <label class="btn btn-sm"><i class="fas fa-images"></i> Chèn ảnh
+                            <input type="file" id="pInsertImg" accept="image/*" multiple hidden></label>
                         <button type="button" class="btn btn-sm" id="btnInsertLink"><i class="fas fa-link"></i> Chèn link</button>
                         <button type="button" class="btn btn-sm" id="btnInsertList"><i class="fas fa-list-ul"></i> Danh sách</button>
                     </div>
-                    <textarea id="fContent" rows="14" placeholder="Gõ nội dung bình thường. Mỗi lần xuống dòng sẽ thành một đoạn văn mới."></textarea>
-                    <div class="hint">Không cần biết HTML: mỗi dòng là một đoạn văn. Dùng các nút phía trên để in đậm, chèn ảnh, chèn link.</div>
+                    <textarea id="pContent" rows="14" placeholder="Gõ nội dung bình thường. Mỗi lần xuống dòng là một đoạn văn mới."></textarea>
+                    <div class="hint">Không cần biết HTML: mỗi dòng là một đoạn văn. Đặt con trỏ ở chỗ muốn chèn rồi bấm "Chèn ảnh" (chọn được nhiều ảnh một lúc).</div>
                 </div>
             </div>
             <div>
                 <div class="preview-label">Xem trước</div>
-                <div class="preview-box" id="preview"></div>
+                <div class="preview-box" id="postPreview"></div>
             </div>
         </div>
         <div class="dlg-foot">
             <button type="button" class="btn" data-close>Hủy</button>
-            <button type="submit" class="btn btn-primary" value="save"><i class="fas fa-check"></i> Lưu bài</button>
+            <button type="submit" class="btn btn-primary"><i class="fas fa-check"></i> Lưu bài</button>
         </div>
     </form>
 </dialog>
 
-<datalist id="imageList"></datalist>
+<!-- ============ HỘP SỬA CÁN BỘ ============ -->
+<dialog id="staffEditor" class="narrow">
+    <form id="staffForm">
+        <div class="dlg-head">
+            <h2 id="staffEditorTitle">Thêm cán bộ</h2>
+            <button type="button" class="btn btn-sm" data-close aria-label="Đóng"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="dlg-body">
+            <div class="field">
+                <span class="field-label">Ảnh chân dung</span>
+                <div class="image-picker portrait">
+                    <img id="sImagePreview" alt="">
+                    <div>
+                        <label class="btn btn-sm"><i class="fas fa-image"></i> Chọn ảnh...
+                            <input type="file" id="sImageFile" accept="image/*" hidden></label>
+                        <div class="hint" id="sImageName">Chưa có ảnh</div>
+                        <div class="hint">Nên dùng ảnh dọc (chân dung), ảnh sẽ tự thu nhỏ.</div>
+                    </div>
+                </div>
+            </div>
+            <div class="field">
+                <label for="sName">Họ tên (kèm học hàm, học vị) *</label>
+                <input type="text" id="sName" required placeholder="Ví dụ: TS. Nguyễn Văn A">
+            </div>
+            <div class="row3">
+                <div class="field">
+                    <label for="sGender">Giới tính</label>
+                    <select id="sGender"><option>Nam</option><option>Nữ</option></select>
+                </div>
+                <div class="field">
+                    <label for="sBirthday">Năm sinh</label>
+                    <input type="text" id="sBirthday" placeholder="1985" inputmode="numeric">
+                </div>
+                <div class="field">
+                    <label for="sType">Loại</label>
+                    <select id="sType"><option value="giang-vien">Giảng viên</option><option value="van-thu">Văn thư</option></select>
+                </div>
+            </div>
+            <div class="field">
+                <label for="sDept">Bộ môn</label>
+                <select id="sDept"></select>
+            </div>
+            <div class="field">
+                <span class="field-label">Chức vụ (nếu có)</span>
+                <div class="checks" id="sRoles"></div>
+            </div>
+            <div class="row2">
+                <div class="field">
+                    <label for="sEmail">Email</label>
+                    <input type="email" id="sEmail" placeholder="ten@husc.edu.vn">
+                </div>
+                <div class="field">
+                    <label for="sPhone">Điện thoại</label>
+                    <input type="text" id="sPhone" placeholder="0912.345.678">
+                </div>
+            </div>
+            <div id="sTeacherFields">
+                <div class="field">
+                    <label for="sResearch">Lĩnh vực nghiên cứu</label>
+                    <textarea id="sResearch" rows="3" placeholder="Mỗi dòng một lĩnh vực"></textarea>
+                </div>
+                <div class="field">
+                    <label for="sTeaching">Học phần / lĩnh vực giảng dạy</label>
+                    <textarea id="sTeaching" rows="2" placeholder="Mỗi dòng một học phần (để trống sẽ hiện nội dung chung)"></textarea>
+                </div>
+                <div class="field">
+                    <label for="sScience">Link trang dữ liệu khoa học</label>
+                    <input type="text" id="sScience" placeholder="https://csdlkhoahoc.hueuni.edu.vn/...">
+                </div>
+                <span class="field-label">Quá trình đào tạo <span class="hint">(bỏ trống bậc nào thì bậc đó không hiển thị)</span></span>
+                <div id="sEdu"></div>
+            </div>
+        </div>
+        <div class="dlg-foot">
+            <button type="button" class="btn" data-close>Hủy</button>
+            <button type="submit" class="btn btn-primary"><i class="fas fa-check"></i> Lưu</button>
+        </div>
+    </form>
+</dialog>
+
+<!-- ============ HƯỚNG DẪN ============ -->
+<dialog id="guide">
+    <div class="dlg-head">
+        <h2><i class="fas fa-circle-question"></i> Hướng dẫn cập nhật website</h2>
+        <button type="button" class="btn btn-sm" data-close aria-label="Đóng"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="guide-body">
+        <nav class="guide-toc">
+            <a href="#g-nguyen-tac">Nguyên tắc chung</a>
+            <a href="#g-mo">1. Mở trang quản trị</a>
+            <a href="#g-bai-viet">2. Bài viết</a>
+            <a href="#g-can-bo">3. Cán bộ</a>
+            <a href="#g-filezilla">4. Tải lên bằng FileZilla</a>
+            <a href="#g-lay-ve">5. Lấy bản mới từ máy chủ</a>
+            <a href="#g-khac">6. Menu, chân trang, trang khác</a>
+            <a href="#g-su-co">7. Khi gặp sự cố</a>
+            <a href="#g-thu-muc">8. Các thư mục của website</a>
+        </nav>
+        <div class="guide-content">
+            <h3 id="g-nguyen-tac">Nguyên tắc chung</h3>
+            <ol>
+                <li><b>Luôn sửa trên bản website trong máy tính của bạn</b>, sau đó dùng <b>FileZilla</b> tải lên máy chủ của trường.</li>
+                <li>Bài viết và cán bộ: <b>dùng trang này</b>. Không cần biết lập trình.</li>
+                <li>Nếu nhiều người cùng quản lý: trước khi sửa, hãy <a href="#g-lay-ve">lấy bản mới nhất từ máy chủ về</a> để không ghi đè mất thay đổi của người khác.</li>
+            </ol>
+
+            <h3 id="g-mo">1. Mở trang quản trị</h3>
+            <ol>
+                <li>Mở thư mục website trên máy → vào thư mục <code>admin</code> → <b>nháy đúp</b> file <code>index.html</code>.<br>
+                    Phải mở bằng <b>Microsoft Edge</b> hoặc <b>Google Chrome</b> (nếu máy mở bằng trình duyệt khác: chuột phải → <i>Open with</i> → chọn Edge/Chrome).</li>
+                <li>Bấm <b>"Chọn thư mục website"</b> → chọn thư mục có <code>index.html</code>, <code>data</code>, <code>graph</code> → bấm <b>Chọn thư mục / Select Folder</b>.</li>
+                <li>Trình duyệt hỏi quyền → bấm <b>"Cho phép" / "Lưu thay đổi" / "Edit files"</b>.</li>
+            </ol>
+            <p>Từ lần sau chỉ cần bấm <b>"Mở lại thư mục..."</b> rồi bấm <i>Cho phép</i>.</p>
+            <div class="tip"><b>Mẹo:</b> chuột phải vào <code>admin/index.html</code> → <i>Send to</i> → <i>Desktop (create shortcut)</i> để có biểu tượng ngoài màn hình.</div>
+
+            <h3 id="g-bai-viet">2. Đăng, sửa, xóa bài viết</h3>
+            <p>Thẻ <b>Bài viết</b> → bấm <b>Viết bài mới</b>:</p>
+            <ul>
+                <li>Chọn chuyên mục, ngày đăng, nhập tiêu đề và tóm tắt (1–2 câu hiện ở trang chủ).</li>
+                <li><b>Ảnh đại diện</b>: bấm <i>Chọn ảnh...</i>, chọn ảnh bất kỳ trên máy. Ảnh tự được thu nhỏ, đặt tên và chép vào thư mục <code>graph/</code>.</li>
+                <li><b>Nội dung</b>: gõ như bình thường, <b>mỗi dòng là một đoạn văn</b>.
+                    Muốn chèn ảnh giữa bài: đặt con trỏ vào chỗ cần chèn → bấm <b>Chèn ảnh</b> (chọn được nhiều ảnh một lúc).</li>
+                <li>Bôi đen chữ rồi bấm <b>B</b> để in đậm, <b>I</b> để in nghiêng; <b>Chèn link</b> để thêm đường dẫn.</li>
+                <li>Khung <b>Xem trước</b> bên phải cho thấy bài sẽ hiển thị ra sao → bấm <b>Lưu bài</b>.</li>
+            </ul>
+            <p><b>Sửa</b>: bấm <i>Sửa</i> ở dòng bài viết. <b>Xóa</b>: bấm nút thùng rác. Bài mới nhất (theo ngày đăng) tự lên đầu trang chủ.</p>
+            <div class="note">Sau khi lưu, bài mới chỉ có trên máy bạn. Phải <a href="#g-filezilla">tải lên bằng FileZilla</a> thì website mới thay đổi.</div>
+
+            <h3 id="g-can-bo">3. Thêm, sửa cán bộ</h3>
+            <ul>
+                <li>Thẻ <b>Cán bộ</b> → <b>Thêm cán bộ</b> hoặc <b>Sửa</b>: điền họ tên kèm học vị (vd. <code>TS. Nguyễn Văn A</code>), bộ môn, chức vụ, email, ảnh chân dung, quá trình đào tạo...</li>
+                <li>Mũi tên <i class="fas fa-arrow-up"></i> <i class="fas fa-arrow-down"></i> đổi thứ tự hiển thị trên web.</li>
+                <li>Khi đổi trưởng bộ môn / trưởng khoa: nhớ <b>bỏ chức vụ của người cũ</b>.</li>
+                <li>Cán bộ có chữ đỏ <span class="missing-img">Thiếu ảnh</span>: bấm <i>Sửa</i> → <i>Chọn ảnh...</i> để bổ sung.</li>
+            </ul>
+            <p>Các trang <i>Đội ngũ cán bộ</i>, <i>Cơ cấu tổ chức</i> và trang thông tin từng giảng viên tự cập nhật theo.</p>
+
+            <h3 id="g-filezilla">4. Tải thay đổi lên máy chủ bằng FileZilla</h3>
+            <p>Sau khi lưu, trang này hiện <b>khung màu vàng</b> liệt kê các file đã thay đổi, ví dụ <code>data/data.json</code>, <code>graph/tin-tuc-000006.jpg</code>.</p>
+            <ol>
+                <li>Mở <b>FileZilla</b> và kết nối tới máy chủ của trường.</li>
+                <li><b>Khung bên trái</b> (máy bạn): mở thư mục website. <b>Khung bên phải</b> (máy chủ): mở thư mục website trên máy chủ.</li>
+                <li>Với mỗi file trong khung vàng: vào <b>đúng thư mục</b> đó ở cả hai bên (vd. <code>data</code> ↔ <code>data</code>, <code>graph</code> ↔ <code>graph</code>) rồi <b>kéo file từ trái sang phải</b>.
+                    Nếu được hỏi file đã tồn tại → chọn <b>Overwrite (Ghi đè)</b> → OK.</li>
+                <li>Mở website kiểm tra (nhấn <kbd>Ctrl</kbd> + <kbd>F5</kbd> để tải lại). Nếu đúng, quay lại đây bấm <b>"Tôi đã tải lên xong"</b>.</li>
+            </ol>
+            <div class="note"><b>Cẩn thận:</b> không kéo cả thư mục <code>data</code> hay <code>graph</code> vào <b>bên trong</b> thư mục cùng tên trên máy chủ (sẽ thành <code>data/data/...</code> và web không nhận).</div>
+
+            <h3 id="g-lay-ve">5. Lấy bản mới nhất từ máy chủ về máy</h3>
+            <p>Dùng khi mới nhận bàn giao, đổi máy tính, hoặc có người khác vừa cập nhật web:</p>
+            <ol>
+                <li>Trong FileZilla, ở khung bên phải chọn thư mục <code>data</code> và <code>graph</code> trên máy chủ.</li>
+                <li>Kéo sang <b>thư mục website</b> ở khung bên trái → chọn <b>Overwrite</b>.</li>
+                <li>Nếu trang quản trị đang mở: tải lại trang (<kbd>F5</kbd>) rồi bấm "Mở lại thư mục...".</li>
+            </ol>
+
+            <h3 id="g-khac">6. Menu, chân trang và các trang giới thiệu</h3>
+            <p>Các phần này ít khi thay đổi và cần sửa trực tiếp file (nên nhờ người biết HTML cơ bản). Sửa bằng <b>Notepad++</b> hoặc <b>VS Code</b>, lưu với mã hóa <b>UTF-8</b>.</p>
+            <ul>
+                <li><b>Menu, địa chỉ, email, điện thoại ở chân trang</b>: mở <code>js/layout.js</code>, sửa phần <code>MENU</code> và <code>FOOTER</code> ở đầu file. Sửa một lần là mọi trang đều đổi theo. Sau đó tải <code>js/layout.js</code> lên máy chủ.</li>
+                <li><b>Nội dung trang giới thiệu, đào tạo, bộ môn...</b>: mở file tương ứng trong <code>pages/</code>, chỉ sửa phần nằm giữa <code>&lt;main id="main-content"&gt;</code> và <code>&lt;/main&gt;</code>, rồi tải file đó lên.</li>
+                <li><b>Thêm trang mới</b>: sao chép một file trong <code>pages/</code> (vd. <code>tong-quan.html</code>), đổi tên (không dấu, không khoảng trắng), sửa <code>&lt;title&gt;</code> và nội dung, thêm link vào <code>MENU</code> trong <code>js/layout.js</code>, rồi tải cả 2 file lên.</li>
+            </ul>
+
+            <h3 id="g-su-co">7. Khi gặp sự cố</h3>
+            <table>
+                <tr><th style="width:38%">Hiện tượng</th><th>Cách xử lý</th></tr>
+                <tr><td>Web không đổi sau khi tải lên</td><td>Nhấn <kbd>Ctrl</kbd> + <kbd>F5</kbd>. Kiểm tra file đã vào đúng thư mục trên máy chủ chưa.</td></tr>
+                <tr><td>Báo <i>"không phải thư mục website"</i></td><td>Chọn đúng thư mục chứa <code>index.html</code> (không chọn <code>data</code> hay <code>admin</code>).</td></tr>
+                <tr><td>Báo file <i>"bị lỗi định dạng"</i></td><td>File dữ liệu bị sửa tay sai. <a href="#g-lay-ve">Lấy lại bản trên máy chủ</a>.</td></tr>
+                <tr><td>Báo trình duyệt chưa hỗ trợ</td><td>Mở bằng Edge hoặc Chrome, và mở file từ máy tính (không mở qua địa chỉ web).</td></tr>
+                <tr><td>Không chọn được ảnh từ iPhone (HEIC)</td><td>Chuyển ảnh sang JPG trước, hoặc gửi ảnh qua Zalo rồi lưu lại.</td></tr>
+                <tr><td>Mở <code>index.html</code> trên máy không thấy tin tức</td><td>Bình thường — trình duyệt chặn đọc dữ liệu khi mở file trực tiếp. Hãy xem trên web thật.</td></tr>
+            </table>
+
+            <h3 id="g-thu-muc">8. Các thư mục của website</h3>
+            <table>
+                <tr><th style="width:38%">Thư mục / file</th><th>Chứa gì</th></tr>
+                <tr><td><code>data/data.json</code></td><td>Tất cả bài viết</td></tr>
+                <tr><td><code>data/staff.json</code></td><td>Danh sách cán bộ, giảng viên</td></tr>
+                <tr><td><code>graph/</code></td><td>Tất cả hình ảnh</td></tr>
+                <tr><td><code>admin/</code></td><td>Trang quản trị này (chỉ dùng trên máy, <b>không cần</b> tải lên máy chủ)</td></tr>
+                <tr><td><code>js/layout.js</code></td><td>Menu và chân trang dùng chung</td></tr>
+                <tr><td><code>pages/</code></td><td>Các trang giới thiệu, đào tạo, bộ môn...</td></tr>
+                <tr><td><code>index.html</code></td><td>Trang chủ</td></tr>
+                <tr><td><code>css/</code>, <code>js/app.js</code></td><td>Giao diện và mã xử lý — thường không cần đụng tới</td></tr>
+            </table>
+        </div>
+    </div>
+</dialog>
+
+<div id="busy" class="busy" hidden><span><i class="fas fa-spinner fa-spin"></i> Đang lưu...</span></div>
 
 <script>
-    // Danh sách chuyên mục — phải khớp với CATEGORIES trong js/app.js
-    const CATEGORIES = {
-        'tin-tuc':   'Tin tức',
-        'thong-bao': 'Thông báo',
-        'hoc-bong':  'Học bổng',
-        'doan-hoi':  'Đoàn hội'
-    };
+/* =====================================================================
+   CẤU HÌNH — phải khớp với js/app.js
+   ===================================================================== */
+const CATEGORIES = { 'tin-tuc': 'Tin tức', 'thong-bao': 'Thông báo', 'hoc-bong': 'Học bổng', 'doan-hoi': 'Đoàn hội' };
+const DEPTS = {
+    'toan-ly-thuyet': 'Bộ môn Toán Lý thuyết',
+    'toan-ung-dung': 'Bộ môn Toán ứng dụng',
+    'xac-suat-thong-ke': 'Bộ môn Xác suất Thống kê'
+};
+const ROLES = {
+    'truong-khoa': 'Trưởng khoa',
+    'pho-truong-khoa': 'Phó Trưởng khoa',
+    'truong-bo-mon': 'Trưởng bộ môn',
+    'tl-sau-dai-hoc': 'Trợ lý Sau đại học',
+    'tl-to-chuc-nckh': 'Trợ lý Tổ chức và NCKH',
+    'tl-giao-vu': 'Trợ lý Giáo vụ',
+    'tl-ctsv-dbcl': 'Trợ lý CTSV và ĐBCL'
+};
+const EDU_LEVELS = ['Đại học', 'Thạc sĩ', 'Tiến sĩ'];
+const NEWS_FILE = 'data/data.json';
+const STAFF_FILE = 'data/staff.json';
+const MAX_NEWS_IMG = 1600;   // px, cạnh dài nhất của ảnh bài viết
+const MAX_STAFF_IMG = 800;   // px, ảnh chân dung
 
-    let data = {};          // nội dung data.json
-    let dirty = false;      // có thay đổi chưa tải về
-    let editing = null;     // { cat, index } khi đang sửa bài cũ
+/* =====================================================================
+   TIỆN ÍCH
+   ===================================================================== */
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const pad = (n) => String(n).padStart(2, '0');
+const toVNDate = (iso) => { const [y, m, d] = iso.split('-'); return `${d}/${m}/${y}`; };
+const toISODate = (vn) => { const [d, m, y] = String(vn || '').split('/'); return y ? `${y}-${pad(m)}-${pad(d)}` : ''; };
+const todayISO = () => { const t = new Date(); return `${t.getFullYear()}-${pad(t.getMonth() + 1)}-${pad(t.getDate())}`; };
+const sortKey = (vn) => toISODate(vn) || '0';
+const lines = (s) => s.split('\n').map(x => x.trim()).filter(Boolean);
+const slug = (s) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/gi, 'd')
+    .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+// "./graph/a.jpg", "../graph/a.jpg", "graph/a.jpg" -> "a.jpg"
+const graphName = (p) => { const m = String(p || '').match(/(?:^|\/)graph\/([^'"?#]+)/); return m ? m[1] : ''; };
 
-    const $ = (id) => document.getElementById(id);
-    const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+function setStatus(html, kind = 'info') {
+    const s = $('status');
+    s.hidden = false;
+    s.className = 'status ' + kind;
+    s.innerHTML = html;
+}
 
-    // ---------- Ngày tháng ----------
-    const pad = (n) => String(n).padStart(2, '0');
-    const toVNDate = (iso) => { const [y, m, d] = iso.split('-'); return `${d}/${m}/${y}`; };        // 2026-03-05 -> 05/03/2026
-    const toISODate = (vn) => {                                                                       // 5/3/2026 -> 2026-03-05
-        const [d, m, y] = String(vn || '').split('/');
-        return y ? `${y}-${pad(m)}-${pad(d)}` : '';
-    };
-    const todayISO = () => { const t = new Date(); return `${t.getFullYear()}-${pad(t.getMonth() + 1)}-${pad(t.getDate())}`; };
-    const sortKey = (vn) => toISODate(vn) || '0';
-
-    // ---------- Đường dẫn ảnh ----------
-    // Trong data.json: ảnh đại diện lưu dạng "./graph/x.jpg", ảnh trong nội dung dạng "../graph/x.jpg"
-    const imageName = (p) => String(p || '').replace(/^(\.\.\/|\.\/|\/)*graph\//, '');
-    const imageSrc = (name) => name ? (/^https?:/.test(name) ? name : '../graph/' + name) : '';
-
-    // ---------- Đọc dữ liệu ----------
-    function setStatus(text, kind = 'info') {
-        const s = $('status');
-        s.className = 'status ' + kind;
-        s.innerHTML = text;
-    }
-
-    function loadData(obj, source) {
-        if (!obj || typeof obj !== 'object' || Array.isArray(obj)) throw new Error('Sai cấu trúc');
-        data = obj;
-        Object.keys(CATEGORIES).forEach(c => { if (!Array.isArray(data[c])) data[c] = []; });
-        dirty = false;
-        $('manager').hidden = false;
-        $('dropZone').hidden = true;
-        setStatus(`Đã mở dữ liệu từ <b>${esc(source)}</b> — ${countPosts()} bài viết.`, 'ok');
-        render();
-    }
-
-    const countPosts = () => Object.keys(CATEGORIES).reduce((n, c) => n + data[c].length, 0);
-
-    async function autoLoad() {
-        try {
-            const res = await fetch('../data/data.json?v=' + Date.now());
-            if (!res.ok) throw new Error();
-            loadData(await res.json(), 'data/data.json');
-        } catch (e) {
-            setStatus('Không tự đọc được <code>data/data.json</code> (thường do mở file trực tiếp, không qua web server). Hãy chọn file bằng tay:', 'warn');
-            $('dropZone').hidden = false;
-        }
-    }
-
-    function readFile(file) {
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = () => {
-            try { loadData(JSON.parse(reader.result), file.name); }
-            catch (e) { setStatus('File không đúng định dạng. Hãy chọn đúng file <code>data/data.json</code>.', 'warn'); }
-        };
-        reader.readAsText(file, 'utf-8');
-    }
-
-    $('fileInput').addEventListener('change', (e) => readFile(e.target.files[0]));
-    const dz = $('dropZone');
-    dz.addEventListener('dragover', (e) => { e.preventDefault(); dz.classList.add('drag'); });
-    dz.addEventListener('dragleave', () => dz.classList.remove('drag'));
-    dz.addEventListener('drop', (e) => { e.preventDefault(); dz.classList.remove('drag'); readFile(e.dataTransfer.files[0]); });
-
-    // ---------- Danh sách bài ----------
-    function setDirty(v) {
-        dirty = v;
-        $('dirtyBadge').hidden = !v;
-    }
-
-    function render() {
-        const filter = $('filterCat').value;
-        const q = $('search').value.trim().toLowerCase();
-        const rows = [];
-        Object.keys(CATEGORIES).forEach(cat => {
-            if (filter && filter !== cat) return;
-            data[cat].forEach((item, index) => {
-                if (q && !String(item.title).toLowerCase().includes(q)) return;
-                rows.push({ cat, index, item });
-            });
+/* =====================================================================
+   LƯU TRỮ CỤC BỘ (ghi nhớ thư mục + danh sách file chờ tải lên)
+   ===================================================================== */
+function idb() {
+    return new Promise((res, rej) => {
+        const r = indexedDB.open('kt-admin', 1);
+        r.onupgradeneeded = () => r.result.createObjectStore('kv');
+        r.onsuccess = () => res(r.result);
+        r.onerror = () => rej(r.error);
+    });
+}
+async function kvGet(key) {
+    try {
+        const db = await idb();
+        return await new Promise(res => {
+            const q = db.transaction('kv').objectStore('kv').get(key);
+            q.onsuccess = () => res(q.result);
+            q.onerror = () => res(undefined);
         });
-        rows.sort((a, b) => sortKey(b.item.date).localeCompare(sortKey(a.item.date)));
+    } catch (e) { return undefined; }
+}
+async function kvSet(key, val) {
+    try {
+        const db = await idb();
+        await new Promise(res => {
+            const tx = db.transaction('kv', 'readwrite');
+            tx.objectStore('kv').put(val, key);
+            tx.oncomplete = tx.onerror = () => res();
+        });
+    } catch (e) { /* bỏ qua */ }
+}
 
-        $('tableBody').innerHTML = rows.length ? rows.map(({ cat, index, item }) => `
-            <tr>
-                <td><img class="thumb" src="${esc(imageSrc(imageName(item.image)))}" alt="" onerror="this.style.visibility='hidden'"></td>
-                <td>${esc(item.date)}</td>
-                <td><span class="tag tag-${cat}">${CATEGORIES[cat]}</span></td>
-                <td style="font-weight:500">${esc(item.title)}</td>
-                <td class="actions">
-                    <button class="btn btn-sm" onclick="openEditor('${cat}', ${index})"><i class="fas fa-pen"></i> Sửa</button>
-                    <button class="btn btn-sm btn-danger" onclick="deleteItem('${cat}', ${index})" title="Xóa"><i class="fas fa-trash"></i></button>
-                </td>
-            </tr>`).join('')
-            : `<tr><td colspan="5" class="empty">Không có bài viết nào.</td></tr>`;
+let pending = new Set();
+async function loadPending() { pending = new Set((await kvGet('pending')) || []); renderPending(); }
+function addPending(path) { pending.add(path); kvSet('pending', [...pending]); renderPending(); }
+function renderPending() {
+    $('pendingCard').hidden = !pending.size || !root;
+    $('pendingList').innerHTML = [...pending].sort().map(p => `<li>${esc(p)}</li>`).join('');
+}
+$('btnUploaded').addEventListener('click', () => {
+    if (!confirm('Bạn đã tải TẤT CẢ các file trong danh sách lên máy chủ?')) return;
+    pending.clear();
+    kvSet('pending', []);
+    renderPending();
+    setStatus('Đã xóa danh sách. Website trên máy chủ đã được cập nhật.', 'ok');
+});
 
-        // Gợi ý tên ảnh đã dùng
-        const names = new Set();
-        Object.keys(CATEGORIES).forEach(c => data[c].forEach(i => { const n = imageName(i.image); if (n) names.add(n); }));
-        $('imageList').innerHTML = [...names].map(n => `<option value="${esc(n)}">`).join('');
-    }
+/* =====================================================================
+   ĐỌC / GHI FILE TRONG THƯ MỤC WEBSITE
+   ===================================================================== */
+let root = null;               // thư mục website đã chọn
+const imgCache = new Map();    // tên ảnh -> URL để hiển thị
 
-    function deleteItem(cat, index) {
-        const item = data[cat][index];
-        if (!confirm(`Xóa bài viết:\n"${item.title}"?\n\n(Bài chỉ bị xóa thật sau khi bạn tải data.json về và chép đè lên website.)`)) return;
-        data[cat].splice(index, 1);
-        setDirty(true);
-        render();
-    }
+async function dirOf(parts, create = false) {
+    let d = root;
+    for (const p of parts) d = await d.getDirectoryHandle(p, { create });
+    return d;
+}
+async function fileHandle(path, create = false) {
+    const parts = path.split('/');
+    const name = parts.pop();
+    return (await dirOf(parts, create)).getFileHandle(name, { create });
+}
+async function readText(path) { return (await (await fileHandle(path)).getFile()).text(); }
+async function exists(path) { try { await fileHandle(path); return true; } catch (e) { return false; } }
+async function writeFile(path, data) {
+    const fh = await fileHandle(path, true);
+    const w = await fh.createWritable();
+    await w.write(data);
+    await w.close();
+    addPending(path);
+}
 
-    // ---------- Soạn bài ----------
-    // Nội dung lưu dạng HTML. Khi người dùng gõ chữ thường (không có thẻ khối), mỗi dòng thành một <p>.
-    const BLOCK_RE = /^\s*<\/?(p|div|ul|ol|h\d|table|blockquote|figure|figcaption|iframe)\b/i;
-    function contentToHtml(text) {
-        return text.split(/\n/).map(l => l.trim()).filter(Boolean)
-            .map(l => BLOCK_RE.test(l) ? l : `<p>${l}</p>`).join('');
-    }
-    // Ngược lại: tách HTML đã lưu ra từng dòng cho dễ sửa
-    function htmlToContent(html) {
-        return String(html || '')
-            .replace(/<\/p>\s*/gi, '</p>\n')
-            .replace(/<\/(div|ul|ol|h\d|table|blockquote|figure)>\s*/gi, '</$1>\n')
-            .replace(/^\s*<p>(.*?)<\/p>$/gim, (m, inner) => /<\/?p\b/i.test(inner) ? m : inner)
-            .trim();
-    }
-
-    function nextId(cat) {
-        const max = data[cat].reduce((m, i) => {
-            const n = parseInt(String(i.id).match(/(\d+)$/)?.[1] || '0', 10);
-            return Math.max(m, n);
-        }, 0);
-        return `${cat}-${String(max + 1).padStart(6, '0')}`;
-    }
-
-    function openEditor(cat, index) {
-        editing = cat ? { cat, index } : null;
-        const item = cat ? data[cat][index] : null;
-        $('editorTitle').textContent = item ? 'Sửa bài viết' : 'Viết bài mới';
-        $('fCat').value = cat || ($('filterCat').value || 'tin-tuc');
-        $('fDate').value = item ? toISODate(item.date) : todayISO();
-        $('fTitle').value = item?.title || '';
-        $('fImage').value = imageName(item?.image);
-        $('fExcerpt').value = item?.excerpt || '';
-        $('fContent').value = htmlToContent(item?.content);
-        updatePreview();
-        $('editor').showModal();
-        $('fTitle').focus();
-    }
-
-    function updatePreview() {
-        const img = imageSrc($('fImage').value.trim());
-        const pv = $('fImagePreview');
-        pv.style.display = img ? 'block' : 'none';
-        if (img) pv.src = img;
-        $('preview').innerHTML = `
-            <h3>${esc($('fTitle').value) || '<i style="color:#aaa">(Chưa có tiêu đề)</i>'}</h3>
-            <p style="color:#888;font-size:13px">${$('fDate').value ? toVNDate($('fDate').value) : ''} · ${CATEGORIES[$('fCat').value]}</p>
-            <p style="font-style:italic;color:#555">${esc($('fExcerpt').value)}</p>
-            <hr>
-            ${contentToHtml($('fContent').value) || '<p style="color:#aaa">(Nội dung trống — trang chi tiết sẽ hiển thị phần tóm tắt)</p>'}`;
-    }
-
-    ['fCat', 'fDate', 'fTitle', 'fImage', 'fExcerpt', 'fContent'].forEach(id => $(id).addEventListener('input', updatePreview));
-
-    // Chèn đoạn mã vào vị trí con trỏ trong ô nội dung
-    function insertAtCursor(before, after = '', placeholder = '') {
-        const ta = $('fContent');
-        const { selectionStart: s, selectionEnd: e, value } = ta;
-        const selected = value.slice(s, e) || placeholder;
-        ta.value = value.slice(0, s) + before + selected + after + value.slice(e);
-        ta.focus();
-        ta.selectionStart = s + before.length;
-        ta.selectionEnd = s + before.length + selected.length;
-        updatePreview();
-    }
-
-    document.querySelectorAll('[data-wrap]').forEach(b => b.addEventListener('click', () => {
-        const t = b.dataset.wrap;
-        insertAtCursor(`<${t}>`, `</${t}>`, 'chữ');
-    }));
-    $('btnInsertImg').addEventListener('click', () => {
-        const name = prompt('Tên file ảnh trong thư mục graph/ (vd. tin-tuc-000005-1.jpg):');
-        if (!name) return;
-        const alt = prompt('Mô tả ngắn cho ảnh (không bắt buộc):') || '';
-        insertAtCursor(`\n<div class='about-image-container'><img src='../graph/${name.trim()}' alt='${alt.replace(/'/g, '')}' class='about-image'></div>\n`);
-    });
-    $('btnInsertLink').addEventListener('click', () => {
-        const href = prompt('Địa chỉ link (bắt đầu bằng https://):', 'https://');
-        if (!href || href === 'https://') return;
-        insertAtCursor(`<a href="${href.trim()}" target="_blank">`, '</a>', 'xem tại đây');
-    });
-    $('btnInsertList').addEventListener('click', () => {
-        insertAtCursor(`\n<ul class="about-features"><li><i class="fas fa-check-circle"></i> Ý thứ nhất</li><li><i class="fas fa-check-circle"></i> Ý thứ hai</li></ul>\n`);
-    });
-
-    document.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', () => $('editor').close()));
-
-    $('postForm').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const cat = $('fCat').value;
-        const imgName = $('fImage').value.trim();
-        const post = {
-            id: '',
-            title: $('fTitle').value.trim(),
-            date: toVNDate($('fDate').value),
-            image: imgName ? (/^https?:/.test(imgName) ? imgName : './graph/' + imgName) : '',
-            excerpt: $('fExcerpt').value.trim(),
-            content: contentToHtml($('fContent').value)
-        };
-
-        if (editing) {
-            const old = data[editing.cat][editing.index];
-            if (editing.cat === cat) {
-                post.id = old.id;
-                data[cat][editing.index] = { ...old, ...post };
-            } else {
-                // Đổi chuyên mục: chuyển bài sang mảng mới với mã mới
-                data[editing.cat].splice(editing.index, 1);
-                post.id = nextId(cat);
-                data[cat].unshift({ ...old, ...post });
-            }
-        } else {
-            post.id = nextId(cat);
-            data[cat].unshift(post);
+async function imageUrl(name) {
+    if (!name) return '';
+    if (imgCache.has(name)) return imgCache.get(name);
+    let url = '';
+    try { url = URL.createObjectURL(await (await fileHandle('graph/' + name)).getFile()); } catch (e) { /* ảnh chưa có */ }
+    imgCache.set(name, url);
+    return url;
+}
+// Gắn ảnh thật cho các <img data-graph="ten.jpg"> trong một vùng
+function hydrateImages(container) {
+    container.querySelectorAll('img[data-graph]').forEach(async img => {
+        const url = await imageUrl(img.dataset.graph);
+        if (url) img.src = url;
+        else {
+            img.removeAttribute('src');
+            if (img.dataset.missing !== undefined) img.insertAdjacentHTML('afterend', '<span class="missing-img">Thiếu ảnh</span>');
         }
-        setDirty(true);
-        $('editor').close();
-        render();
-        setStatus(`Đã lưu bài <b>${esc(post.title)}</b>. Nhớ bấm <b>"Tải data.json"</b> để cập nhật lên website.`, 'ok');
     });
+}
 
-    // ---------- Xuất file ----------
-    $('btnExport').addEventListener('click', () => {
-        const blob = new Blob([JSON.stringify(data, null, 2) + '\n'], { type: 'application/json' });
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = 'data.json';
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-        setDirty(false);
-        setStatus('Đã tải về <b>data.json</b>. Hãy chép đè file này vào thư mục <code>data/</code> của website (và đưa lên máy chủ / GitHub).', 'ok');
+/* =====================================================================
+   XỬ LÝ ẢNH: thu nhỏ + chuyển sang JPG
+   ===================================================================== */
+const draftImages = new Map();   // ảnh mới chọn, chưa lưu: tên -> Blob
+
+async function processImage(file, maxSize) {
+    let bmp;
+    try { bmp = await createImageBitmap(file); }
+    catch (e) { throw new Error(`Không đọc được ảnh "${file.name}". Nếu là ảnh HEIC từ iPhone, hãy chuyển sang JPG trước.`); }
+    const scale = Math.min(1, maxSize / Math.max(bmp.width, bmp.height));
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.round(bmp.width * scale);
+    canvas.height = Math.round(bmp.height * scale);
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(bmp, 0, 0, canvas.width, canvas.height);
+    return new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.85));
+}
+
+// Tìm tên ảnh chưa bị dùng: base.jpg, base-1.jpg, base-2.jpg...
+async function uniqueImageName(base, start = 0) {
+    for (let n = start; ; n++) {
+        const name = n ? `${base}-${n}.jpg` : `${base}.jpg`;
+        if (!draftImages.has(name) && !(await exists('graph/' + name))) return name;
+    }
+}
+async function addDraftImage(file, base, maxSize, start = 0) {
+    const blob = await processImage(file, maxSize);
+    const name = await uniqueImageName(base, start);
+    draftImages.set(name, blob);
+    imgCache.set(name, URL.createObjectURL(blob));
+    return name;
+}
+// Ghi những ảnh mới thực sự được dùng vào thư mục graph/
+async function saveDraftImages(usedText) {
+    for (const [name, blob] of draftImages) {
+        if (usedText.includes(name)) await writeFile('graph/' + name, blob);
+    }
+    draftImages.clear();
+}
+
+/* =====================================================================
+   MỞ THƯ MỤC WEBSITE
+   ===================================================================== */
+let news = {};
+let staffDoc = { staff_data: [] };
+const staff = () => staffDoc.staff_data;
+
+async function openFolder(handle) {
+    root = handle;
+    imgCache.clear();
+    try {
+        let newsText, staffText;
+        try { newsText = await readText(NEWS_FILE); staffText = await readText(STAFF_FILE); }
+        catch (e) {
+            root = null;
+            setStatus(`Thư mục <b>${esc(handle.name)}</b> không phải thư mục website (không thấy <code>${NEWS_FILE}</code> và <code>${STAFF_FILE}</code>). Hãy chọn thư mục chứa file <code>index.html</code>.`, 'err');
+            return;
+        }
+        try { news = JSON.parse(newsText); } catch (e) { throw new Error(`File <code>${NEWS_FILE}</code> bị lỗi định dạng: ${esc(e.message)}`); }
+        try { staffDoc = JSON.parse(staffText); } catch (e) { throw new Error(`File <code>${STAFF_FILE}</code> bị lỗi định dạng: ${esc(e.message)}`); }
+        Object.keys(CATEGORIES).forEach(c => { if (!Array.isArray(news[c])) news[c] = []; });
+        if (!Array.isArray(staffDoc.staff_data)) staffDoc.staff_data = [];
+    } catch (e) {
+        root = null;
+        setStatus(e.message, 'err');
+        return;
+    }
+    await kvSet('dir', handle);
+    $('connectCard').hidden = true;
+    $('workspace').hidden = false;
+    $('folderBadge').hidden = false;
+    $('folderBadge').innerHTML = `<i class="fas fa-folder"></i> ${esc(handle.name)}`;
+    $('btnChangeFolder').hidden = false;
+    $('status').hidden = true;
+    renderPending();
+    renderNews();
+    renderStaff();
+}
+
+async function pickFolder() {
+    try {
+        const h = await window.showDirectoryPicker({ id: 'kt-website', mode: 'readwrite' });
+        await openFolder(h);
+    } catch (e) {
+        if (e.name !== 'AbortError') setStatus('Không mở được thư mục: ' + esc(e.message), 'err');
+    }
+}
+
+async function init() {
+    if (!window.showDirectoryPicker) {
+        const onServer = /^https?:/.test(location.protocol) && !/^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+        $('connectArea').hidden = true;
+        $('unsupported').hidden = false;
+        $('unsupported').innerHTML = onServer
+            ? '<b>Trang quản trị không chạy trực tiếp trên website.</b><br>Hãy mở thư mục website trên máy tính của bạn, vào thư mục <code>admin</code> và nháy đúp file <code>index.html</code> (mở bằng Microsoft Edge hoặc Google Chrome).'
+            : '<b>Trình duyệt này chưa hỗ trợ.</b> Hãy mở trang này bằng <b>Microsoft Edge</b> hoặc <b>Google Chrome</b> trên máy tính.';
+        return;
+    }
+    await loadPending();
+    const saved = await kvGet('dir');
+    if (saved) {
+        const btn = $('btnReopen');
+        btn.hidden = false;
+        $('btnPickFolder').classList.remove('btn-primary');
+        $('btnPickFolder').innerHTML = '<i class="fas fa-folder-open"></i> Chọn thư mục khác';
+        btn.innerHTML = `<i class="fas fa-folder-open"></i> Mở lại thư mục "${esc(saved.name)}"`;
+        btn.onclick = async () => {
+            try {
+                if (await saved.requestPermission({ mode: 'readwrite' }) === 'granted') await openFolder(saved);
+            } catch (e) { pickFolder(); }
+        };
+    }
+}
+$('btnPickFolder').addEventListener('click', pickFolder);
+$('btnChangeFolder').addEventListener('click', pickFolder);
+
+async function withBusy(fn) {
+    $('busy').hidden = false;
+    try { await fn(); }
+    catch (e) { alert('Có lỗi khi lưu file:\n' + e.message); throw e; }
+    finally { $('busy').hidden = true; }
+}
+const saveNews = () => writeFile(NEWS_FILE, JSON.stringify(news, null, 2) + '\n');
+const saveStaff = () => writeFile(STAFF_FILE, JSON.stringify(staffDoc, null, 2) + '\n');
+
+/* =====================================================================
+   TAB
+   ===================================================================== */
+document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x === t));
+    $('tab-news').hidden = t.dataset.tab !== 'news';
+    $('tab-staff').hidden = t.dataset.tab !== 'staff';
+}));
+document.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', () => b.closest('dialog').close()));
+['postEditor', 'staffEditor'].forEach(id => $(id).addEventListener('close', () => draftImages.clear()));
+
+/* Hướng dẫn */
+function openGuide(anchor) {
+    $('guide').showModal();
+    const target = anchor && document.getElementById(anchor);
+    if (target) target.scrollIntoView(); else $('guide').scrollTop = 0;
+}
+$('btnGuide').addEventListener('click', () => openGuide());
+$('guide').addEventListener('click', (e) => {
+    const a = e.target.closest('a[href^="#g-"]');
+    if (!a) return;
+    e.preventDefault();
+    document.getElementById(a.getAttribute('href').slice(1))?.scrollIntoView({ behavior: 'smooth' });
+});
+
+/* =====================================================================
+   BÀI VIẾT
+   ===================================================================== */
+function renderNews() {
+    const filter = $('filterCat').value;
+    const q = $('searchPost').value.trim().toLowerCase();
+    const rows = [];
+    Object.keys(CATEGORIES).forEach(cat => {
+        if (filter && filter !== cat) return;
+        news[cat].forEach((item, index) => {
+            if (q && !String(item.title).toLowerCase().includes(q)) return;
+            rows.push({ cat, index, item });
+        });
     });
+    rows.sort((a, b) => sortKey(b.item.date).localeCompare(sortKey(a.item.date)));
 
-    // ---------- Khởi động ----------
-    Object.entries(CATEGORIES).forEach(([k, v]) => {
-        $('filterCat').insertAdjacentHTML('beforeend', `<option value="${k}">${v}</option>`);
-        $('fCat').insertAdjacentHTML('beforeend', `<option value="${k}">${v}</option>`);
+    $('newsBody').innerHTML = rows.length ? rows.map(({ cat, index, item }) => `
+        <tr>
+            <td><img class="thumb" data-graph="${esc(graphName(item.image))}" alt=""></td>
+            <td>${esc(item.date)}</td>
+            <td><span class="tag tag-${cat}">${CATEGORIES[cat]}</span></td>
+            <td style="font-weight:500">${esc(item.title)}</td>
+            <td class="actions">
+                <button class="btn btn-sm" onclick="openPostEditor('${cat}', ${index})"><i class="fas fa-pen"></i> Sửa</button>
+                <button class="btn btn-sm btn-danger" onclick="deletePost('${cat}', ${index})" title="Xóa"><i class="fas fa-trash"></i></button>
+            </td>
+        </tr>`).join('')
+        : `<tr><td colspan="5" class="empty">Không có bài viết nào.</td></tr>`;
+    hydrateImages($('newsBody'));
+}
+
+async function deletePost(cat, index) {
+    const item = news[cat][index];
+    if (!confirm(`Xóa bài viết:\n"${item.title}"?`)) return;
+    news[cat].splice(index, 1);
+    await withBusy(saveNews);
+    renderNews();
+    setStatus(`Đã xóa bài <b>${esc(item.title)}</b>.`, 'ok');
+}
+
+// Nội dung lưu dạng HTML. Dòng chữ thường -> <p>; dòng bắt đầu bằng thẻ khối giữ nguyên.
+const BLOCK_RE = /^\s*<\/?(p|div|ul|ol|h\d|table|blockquote|figure|figcaption|iframe)\b/i;
+const contentToHtml = (text) => text.split(/\n/).map(l => l.trim()).filter(Boolean)
+    .map(l => BLOCK_RE.test(l) ? l : `<p>${l}</p>`).join('');
+const htmlToContent = (html) => String(html || '')
+    .replace(/<\/p>\s*/gi, '</p>\n')
+    .replace(/<\/(div|ul|ol|h\d|table|blockquote|figure)>\s*/gi, '</$1>\n')
+    .replace(/^\s*<p>(.*?)<\/p>$/gim, (m, inner) => /<\/?p\b/i.test(inner) ? m : inner)
+    .trim();
+
+function nextPostId(cat) {
+    const max = news[cat].reduce((m, i) => Math.max(m, parseInt(String(i.id).match(/(\d+)$/)?.[1] || '0', 10)), 0);
+    return `${cat}-${String(max + 1).padStart(6, '0')}`;
+}
+
+let editingPost = null;   // { cat, index } | null
+let postImageBase = '';   // tiền tố tên ảnh của bài đang soạn
+let postCover = '';       // tên ảnh đại diện
+
+function setPostCover(name) {
+    postCover = name;
+    $('pImageName').textContent = name ? 'graph/' + name : 'Chưa có ảnh';
+    const img = $('pImagePreview');
+    img.removeAttribute('src');
+    imageUrl(name).then(u => { if (u) img.src = u; });
+}
+
+function openPostEditor(cat, index) {
+    editingPost = cat ? { cat, index } : null;
+    const item = cat ? news[cat][index] : null;
+    const curCat = cat || $('filterCat').value || 'tin-tuc';
+    postImageBase = item ? item.id : nextPostId(curCat);
+    $('postEditorTitle').textContent = item ? 'Sửa bài viết' : 'Viết bài mới';
+    $('pCat').value = curCat;
+    $('pDate').value = item ? toISODate(item.date) : todayISO();
+    $('pTitle').value = item?.title || '';
+    $('pExcerpt').value = item?.excerpt || '';
+    $('pContent').value = htmlToContent(item?.content);
+    setPostCover(graphName(item?.image));
+    updatePostPreview();
+    $('postEditor').showModal();
+    $('pTitle').focus();
+}
+
+function updatePostPreview() {
+    const box = $('postPreview');
+    box.innerHTML = `
+        <h3>${esc($('pTitle').value) || '<i style="color:#aaa">(Chưa có tiêu đề)</i>'}</h3>
+        <p style="color:#888;font-size:13px">${$('pDate').value ? toVNDate($('pDate').value) : ''} · ${CATEGORIES[$('pCat').value]}</p>
+        <p style="font-style:italic;color:#555">${esc($('pExcerpt').value)}</p>
+        <hr>
+        ${contentToHtml($('pContent').value) || '<p style="color:#aaa">(Nội dung trống — trang chi tiết sẽ hiển thị phần tóm tắt)</p>'}`;
+    box.querySelectorAll('img').forEach(img => {
+        const n = graphName(img.getAttribute('src'));
+        if (n) { img.dataset.graph = n; img.removeAttribute('src'); }
     });
-    $('filterCat').addEventListener('change', render);
-    $('search').addEventListener('input', render);
-    $('btnNew').addEventListener('click', () => openEditor());
+    hydrateImages(box);
+}
+['pCat', 'pDate', 'pTitle', 'pExcerpt', 'pContent'].forEach(id => $(id).addEventListener('input', updatePostPreview));
 
-    window.addEventListener('beforeunload', (e) => {
-        if (dirty) { e.preventDefault(); e.returnValue = ''; }
+function insertAtCursor(before, after = '', placeholder = '') {
+    const ta = $('pContent');
+    const { selectionStart: s, selectionEnd: e, value } = ta;
+    const selected = value.slice(s, e) || placeholder;
+    ta.value = value.slice(0, s) + before + selected + after + value.slice(e);
+    ta.focus();
+    ta.selectionStart = s + before.length;
+    ta.selectionEnd = s + before.length + selected.length;
+    updatePostPreview();
+}
+
+$('pImageFile').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    e.target.value = '';
+    if (!file) return;
+    try { setPostCover(await addDraftImage(file, postImageBase, MAX_NEWS_IMG)); }
+    catch (err) { alert(err.message); }
+});
+$('pInsertImg').addEventListener('change', async (e) => {
+    const files = [...e.target.files];
+    e.target.value = '';
+    const alt = ($('pTitle').value || 'Hình ảnh').replace(/['"<>]/g, '');
+    let html = '';
+    for (const f of files) {
+        try {
+            const name = await addDraftImage(f, postImageBase, MAX_NEWS_IMG, 1);
+            html += `\n<div class='about-image-container'><img src='../graph/${name}' alt='${alt}' class='about-image'></div>\n`;
+        } catch (err) { alert(err.message); }
+    }
+    if (html) insertAtCursor(html);
+});
+document.querySelectorAll('[data-wrap]').forEach(b => b.addEventListener('click', () => {
+    insertAtCursor(`<${b.dataset.wrap}>`, `</${b.dataset.wrap}>`, 'chữ');
+}));
+$('btnInsertLink').addEventListener('click', () => {
+    const href = prompt('Địa chỉ link (bắt đầu bằng https://):', 'https://');
+    if (!href || href === 'https://') return;
+    insertAtCursor(`<a href="${href.trim().replace(/"/g, '')}" target="_blank">`, '</a>', 'xem tại đây');
+});
+$('btnInsertList').addEventListener('click', () => {
+    insertAtCursor(`\n<ul class="about-features"><li><i class="fas fa-check-circle"></i> Ý thứ nhất</li><li><i class="fas fa-check-circle"></i> Ý thứ hai</li></ul>\n`);
+});
+
+$('postForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const cat = $('pCat').value;
+    const post = {
+        title: $('pTitle').value.trim(),
+        date: toVNDate($('pDate').value),
+        image: postCover ? './graph/' + postCover : '',
+        excerpt: $('pExcerpt').value.trim(),
+        content: contentToHtml($('pContent').value)
+    };
+    let saved;
+    if (editingPost) {
+        const old = news[editingPost.cat][editingPost.index];
+        if (editingPost.cat === cat) {
+            saved = news[cat][editingPost.index] = { ...old, ...post };
+        } else {
+            news[editingPost.cat].splice(editingPost.index, 1);
+            saved = { ...old, ...post, id: nextPostId(cat) };
+            news[cat].unshift(saved);
+        }
+    } else {
+        saved = { id: nextPostId(cat), ...post };
+        news[cat].unshift(saved);
+    }
+    await withBusy(async () => {
+        await saveDraftImages(post.image + post.content);
+        await saveNews();
     });
+    $('postEditor').close();
+    renderNews();
+    setStatus(`Đã lưu bài <b>${esc(saved.title)}</b> vào máy. Tải các file trong khung vàng lên máy chủ để cập nhật website.`, 'ok');
+});
 
-    autoLoad();
+/* =====================================================================
+   CÁN BỘ
+   ===================================================================== */
+const roleLabels = (p) => (p.roles || []).map(r => ROLES[r]).filter(Boolean);
+
+function renderStaff() {
+    const q = slug($('searchStaff').value);
+    const list = staff();
+    $('staffBody').innerHTML = list.map((p, i) => {
+        if (q && !slug(p.name).includes(q)) return '';
+        const roles = roleLabels(p);
+        if (p.type === 'van-thu') roles.unshift('Văn thư');
+        return `
+        <tr>
+            <td><img class="avatar" data-graph="${esc(graphName(p.image))}" data-missing alt=""></td>
+            <td style="font-weight:500">${esc(p.name)}</td>
+            <td>${esc(DEPTS[p.department] || p.department_name || '')}</td>
+            <td>${roles.map(r => `<span class="tag tag-role">${esc(r)}</span>`).join(' ') || '<span style="color:#999">Giảng viên</span>'}</td>
+            <td class="actions">
+                <button class="btn btn-sm" onclick="moveStaff(${i}, -1)" ${i === 0 ? 'disabled' : ''} title="Lên"><i class="fas fa-arrow-up"></i></button>
+                <button class="btn btn-sm" onclick="moveStaff(${i}, 1)" ${i === list.length - 1 ? 'disabled' : ''} title="Xuống"><i class="fas fa-arrow-down"></i></button>
+                <button class="btn btn-sm" onclick="openStaffEditor(${i})"><i class="fas fa-pen"></i> Sửa</button>
+                <button class="btn btn-sm btn-danger" onclick="deleteStaff(${i})" title="Xóa"><i class="fas fa-trash"></i></button>
+            </td>
+        </tr>`;
+    }).join('') || `<tr><td colspan="5" class="empty">Không có cán bộ nào.</td></tr>`;
+    hydrateImages($('staffBody'));
+}
+
+async function moveStaff(i, dir) {
+    const list = staff();
+    const j = i + dir;
+    if (j < 0 || j >= list.length) return;
+    [list[i], list[j]] = [list[j], list[i]];
+    await withBusy(saveStaff);
+    renderStaff();
+}
+
+async function deleteStaff(i) {
+    const p = staff()[i];
+    if (!confirm(`Xóa cán bộ "${p.name}" khỏi website?`)) return;
+    staff().splice(i, 1);
+    await withBusy(saveStaff);
+    renderStaff();
+    setStatus(`Đã xóa <b>${esc(p.name)}</b>.`, 'ok');
+}
+
+let editingStaff = null;   // chỉ số | null
+let staffPhoto = '';
+
+function setStaffPhoto(name) {
+    staffPhoto = name;
+    $('sImageName').textContent = name ? 'graph/' + name : 'Chưa có ảnh';
+    const img = $('sImagePreview');
+    img.removeAttribute('src');
+    imageUrl(name).then(u => {
+        if (u) img.src = u;
+        else if (name) $('sImageName').textContent = `Chưa có file graph/${name} — hãy chọn ảnh`;
+    });
+}
+
+function openStaffEditor(i) {
+    editingStaff = i ?? null;
+    const p = i != null ? staff()[i] : {};
+    $('staffEditorTitle').textContent = i != null ? 'Sửa thông tin cán bộ' : 'Thêm cán bộ';
+    $('sName').value = p.name || '';
+    $('sGender').value = p.gender || 'Nam';
+    $('sBirthday').value = p.birthday || '';
+    $('sType').value = p.type || 'giang-vien';
+    $('sDept').value = p.department || Object.keys(DEPTS)[0];
+    document.querySelectorAll('#sRoles input').forEach(cb => { cb.checked = (p.roles || []).includes(cb.value); });
+    $('sEmail').value = p.contact?.email || '';
+    $('sPhone').value = p.contact?.phone || '';
+    $('sResearch').value = (p.research_fields || []).join('\n');
+    $('sTeaching').value = (p.teaching_fields || []).join('\n');
+    $('sScience').value = p.science_url || '';
+    EDU_LEVELS.forEach((lv, k) => {
+        const e = (p.education || []).find(x => x.level === lv) || {};
+        $(`sEduMajor${k}`).value = e.major || '';
+        $(`sEduPlace${k}`).value = e.place || '';
+        $(`sEduYear${k}`).value = e.year || '';
+    });
+    setStaffPhoto(graphName(p.image));
+    toggleTeacherFields();
+    $('staffEditor').showModal();
+    $('sName').focus();
+}
+function toggleTeacherFields() { $('sTeacherFields').hidden = $('sType').value !== 'giang-vien'; }
+$('sType').addEventListener('change', toggleTeacherFields);
+
+function staffIdFor(name, exceptIndex) {
+    const base = slug(name) || 'can-bo';
+    const used = new Set(staff().filter((_, i) => i !== exceptIndex).map(p => p.id));
+    let id = base;
+    for (let n = 2; used.has(id); n++) id = `${base}-${n}`;
+    return id;
+}
+
+$('sImageFile').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    e.target.value = '';
+    if (!file) return;
+    const old = editingStaff != null ? staff()[editingStaff] : null;
+    const base = old?.id || staffIdFor($('sName').value || 'can-bo');
+    try { setStaffPhoto(await addDraftImage(file, base, MAX_STAFF_IMG)); }
+    catch (err) { alert(err.message); }
+});
+
+$('staffForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const old = editingStaff != null ? staff()[editingStaff] : {};
+    const type = $('sType').value;
+    const dept = $('sDept').value;
+    const checked = [...document.querySelectorAll('#sRoles input:checked')].map(cb => cb.value);
+
+    // Mỗi bộ môn chỉ nên có một trưởng bộ môn
+    if (checked.includes('truong-bo-mon')) {
+        const other = staff().find((p, i) => i !== editingStaff && p.department === dept && p.roles?.includes('truong-bo-mon'));
+        if (other && !confirm(`${DEPTS[dept]} đã có trưởng bộ môn là ${other.name}.\nVẫn lưu? (Nhớ bỏ chức vụ của người cũ.)`)) return;
+    }
+
+    const roles = [...checked];
+    if (roles.includes('truong-khoa') || roles.includes('pho-truong-khoa')) roles.unshift('ban-chu-nhiem');
+    if (type === 'van-thu') roles.unshift('van-thu');
+
+    const title = roles.includes('truong-khoa') ? 'Trưởng khoa'
+        : roles.includes('pho-truong-khoa') ? 'Phó Trưởng khoa'
+        : roles.includes('truong-bo-mon') ? 'Trưởng ' + DEPTS[dept].replace(/^Bộ môn/, 'bộ môn')
+        : type === 'van-thu' ? 'Văn thư' : 'Giảng viên';
+
+    const name = $('sName').value.trim();
+    const p = {
+        ...old,
+        id: old.id || staffIdFor(name),
+        name,
+        gender: $('sGender').value,
+        birthday: $('sBirthday').value.trim(),
+        title,
+        image: staffPhoto ? 'graph/' + staffPhoto : (old.image || ''),
+        type,
+        is_management: roles.some(r => ['truong-khoa', 'pho-truong-khoa', 'truong-bo-mon'].includes(r)),
+        roles,
+        department: dept,
+        department_name: DEPTS[dept],
+        contact: { email: $('sEmail').value.trim(), phone: $('sPhone').value.trim() }
+    };
+    if (type === 'giang-vien') {
+        const otherEdu = (old.education || []).filter(x => !EDU_LEVELS.includes(x.level));
+        p.education = EDU_LEVELS.map((level, k) => ({
+            level,
+            major: $(`sEduMajor${k}`).value.trim(),
+            place: $(`sEduPlace${k}`).value.trim(),
+            year: $(`sEduYear${k}`).value.trim()
+        })).filter(x => x.major || x.place || x.year).concat(otherEdu);
+        p.research_fields = lines($('sResearch').value);
+        const teaching = lines($('sTeaching').value);
+        if (teaching.length) p.teaching_fields = teaching; else delete p.teaching_fields;
+        p.science_url = $('sScience').value.trim();
+    }
+    // Ảnh mới: đặt tên theo mã cán bộ
+    if (!staffPhoto && !old.image) p.image = `graph/${p.id}.jpg`;
+
+    if (editingStaff != null) staff()[editingStaff] = p;
+    else staff().push(p);
+
+    await withBusy(async () => {
+        await saveDraftImages(p.image);
+        await saveStaff();
+    });
+    $('staffEditor').close();
+    renderStaff();
+    setStatus(`Đã lưu thông tin <b>${esc(p.name)}</b> vào máy. Tải các file trong khung vàng lên máy chủ để cập nhật website.`, 'ok');
+});
+
+/* =====================================================================
+   KHỞI ĐỘNG
+   ===================================================================== */
+Object.entries(CATEGORIES).forEach(([k, v]) => {
+    $('filterCat').insertAdjacentHTML('beforeend', `<option value="${k}">${v}</option>`);
+    $('pCat').insertAdjacentHTML('beforeend', `<option value="${k}">${v}</option>`);
+});
+Object.entries(DEPTS).forEach(([k, v]) => $('sDept').insertAdjacentHTML('beforeend', `<option value="${k}">${v}</option>`));
+Object.entries(ROLES).forEach(([k, v]) => $('sRoles').insertAdjacentHTML('beforeend', `<label><input type="checkbox" value="${k}"> ${v}</label>`));
+$('sEdu').innerHTML = EDU_LEVELS.map((lv, k) => `
+    <div class="edu-block">
+        <b>${lv}</b>
+        <div class="row3">
+            <div class="field"><input type="text" id="sEduMajor${k}" placeholder="Ngành (vd. Toán học)"></div>
+            <div class="field"><input type="text" id="sEduPlace${k}" placeholder="Nơi đào tạo"></div>
+            <div class="field"><input type="text" id="sEduYear${k}" placeholder="Năm tốt nghiệp"></div>
+        </div>
+    </div>`).join('');
+$('filterCat').addEventListener('change', renderNews);
+$('searchPost').addEventListener('input', renderNews);
+$('searchStaff').addEventListener('input', renderStaff);
+$('btnNewPost').addEventListener('click', () => openPostEditor());
+$('btnNewStaff').addEventListener('click', () => openStaffEditor());
+
+init();
 </script>
 </body>
 </html>
