@@ -131,8 +131,9 @@
         <div id="unsupported" class="status err" hidden></div>
         <div id="connectArea">
             <ol class="guide">
-                <li>Bấm nút bên dưới và chọn <b>thư mục website</b> trên máy tính (thư mục có <code>index.html</code>, <code>data</code>, <code>graph</code>...).</li>
-                <li>Trình duyệt hỏi quyền sửa file → bấm <b>"Cho phép" / "Lưu thay đổi"</b>.</li>
+                <li>Bấm nút bên dưới. Trong hộp chọn thư mục, <b>bấm một lần</b> vào thư mục website (thư mục chứa <code>admin</code>, <code>data</code>, <code>graph</code>...) rồi bấm <b>"Select Folder" / "Chọn thư mục"</b>.<br>
+                    <span class="hint">Hộp này chỉ hiện thư mục, không hiện file — đó là bình thường, đừng bấm Hủy.</span></li>
+                <li>Trình duyệt hỏi quyền (có thể hỏi 2 lần) → bấm <b>"Xem tệp" / "View files"</b> và <b>"Lưu thay đổi" / "Save changes" / "Edit files"</b>. Nếu có lựa chọn <b>"Cho phép mỗi lần truy cập" / "Allow on every visit"</b> thì chọn mục đó để lần sau khỏi hỏi lại.</li>
                 <li>Thêm, sửa bài viết hoặc cán bộ. Mọi thay đổi được <b>lưu ngay</b> vào thư mục đó.</li>
                 <li>Dùng <b>FileZilla</b> tải những file được liệt kê ở khung màu vàng lên máy chủ.</li>
             </ol>
@@ -360,9 +361,12 @@
             <ol>
                 <li>Mở thư mục website trên máy → vào thư mục <code>admin</code> → <b>nháy đúp</b> file <code>index.html</code>.<br>
                     Phải mở bằng <b>Microsoft Edge</b> hoặc <b>Google Chrome</b> (nếu máy mở bằng trình duyệt khác: chuột phải → <i>Open with</i> → chọn Edge/Chrome).</li>
-                <li>Bấm <b>"Chọn thư mục website"</b> → chọn thư mục có <code>index.html</code>, <code>data</code>, <code>graph</code> → bấm <b>Chọn thư mục / Select Folder</b>.</li>
-                <li>Trình duyệt hỏi quyền → bấm <b>"Cho phép" / "Lưu thay đổi" / "Edit files"</b>.</li>
+                <li>Bấm <b>"Chọn thư mục website"</b>. Trong hộp chọn thư mục, <b>bấm một lần</b> vào thư mục website (thư mục chứa <code>admin</code>, <code>data</code>, <code>graph</code>) → bấm <b>Select Folder / Chọn thư mục</b>.
+                    Hộp này <b>chỉ hiện thư mục, không hiện file</b> — đó là bình thường, đừng bấm Hủy.</li>
+                <li>Trình duyệt hỏi quyền (có thể hỏi 2 lần) → bấm <b>"Xem tệp" / "View files"</b> rồi <b>"Lưu thay đổi" / "Save changes" / "Edit files"</b>.
+                    Nếu có lựa chọn <b>"Cho phép mỗi lần truy cập" / "Allow on every visit"</b> thì chọn để lần sau khỏi hỏi lại.</li>
             </ol>
+            <div class="note"><b>Không mở trang này bằng Live Server</b> hay xem trong VS Code: trang sẽ tự tải lại mỗi khi lưu. Luôn mở bằng cách nháy đúp file <code>admin/index.html</code> trong File Explorer.</div>
             <p>Từ lần sau chỉ cần bấm <b>"Mở lại thư mục..."</b> rồi bấm <i>Cho phép</i>.</p>
             <div class="tip"><b>Mẹo:</b> chuột phải vào <code>admin/index.html</code> → <i>Send to</i> → <i>Desktop (create shortcut)</i> để có biểu tượng ngoài màn hình.</div>
 
@@ -490,6 +494,7 @@ function setStatus(html, kind = 'info') {
     s.hidden = false;
     s.className = 'status ' + kind;
     s.innerHTML = html;
+    s.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
 }
 
 /* =====================================================================
@@ -635,8 +640,25 @@ let staffDoc = { staff_data: [] };
 const staff = () => staffDoc.staff_data;
 
 async function openFolder(handle) {
+    setStatus(`<i class="fas fa-spinner fa-spin"></i> Đang đọc thư mục <b>${esc(handle.name)}</b>...`, 'info');
+    try {
+        await loadFolder(handle);
+    } catch (e) {
+        root = null;
+        console.error(e);
+        setStatus(`Không mở được thư mục <b>${esc(handle.name)}</b>.<br>Chi tiết lỗi (gửi cho người hỗ trợ nếu cần): <code>${esc(e.name)}: ${esc(e.message)}</code>`, 'err');
+    }
+}
+
+async function loadFolder(handle) {
     root = handle;
     imgCache.clear();
+    // Đảm bảo có quyền ghi (trình duyệt sẽ hỏi nếu chưa cấp)
+    if (handle.requestPermission && await handle.requestPermission({ mode: 'readwrite' }) !== 'granted') {
+        root = null;
+        setStatus('Trình duyệt <b>chưa được cấp quyền sửa file</b> trong thư mục này. Hãy bấm chọn lại thư mục và chọn <b>"Cho phép" / "Lưu thay đổi" / "Edit files"</b> khi được hỏi.', 'warn');
+        return;
+    }
     try {
         let newsText, staffText;
         try { newsText = await readText(NEWS_FILE); staffText = await readText(STAFF_FILE); }
@@ -671,9 +693,19 @@ async function pickFolder() {
         const h = await window.showDirectoryPicker({ id: 'kt-website', mode: 'readwrite' });
         await openFolder(h);
     } catch (e) {
-        if (e.name !== 'AbortError') setStatus('Không mở được thư mục: ' + esc(e.message), 'err');
+        if (e.name === 'AbortError') {
+            setStatus('Chưa chọn được thư mục (đã bấm Hủy, hoặc chưa cho phép quyền sửa file). Hãy bấm <b>"Chọn thư mục website"</b> lại, chọn thư mục có <code>index.html</code>, rồi bấm <b>"Cho phép" / "Lưu thay đổi"</b> khi trình duyệt hỏi.', 'warn');
+        } else if (e.name === 'SecurityError' || e.name === 'NotAllowedError') {
+            setStatus(`Trình duyệt không cho phép mở thư mục ở đây (<code>${esc(e.name)}</code>). Hãy mở file <code>admin/index.html</code> trực tiếp bằng <b>Edge</b> hoặc <b>Chrome</b> (không mở trong VS Code hay trình duyệt khác).`, 'err');
+        } else {
+            setStatus(`Không mở được thư mục: <code>${esc(e.name)}: ${esc(e.message)}</code>`, 'err');
+        }
     }
 }
+
+// Mọi lỗi bất ngờ đều hiện lên màn hình thay vì im lặng
+window.addEventListener('error', (e) => setStatus(`Có lỗi xảy ra: <code>${esc(e.message)}</code>. Hãy tải lại trang (F5) và thử lại.`, 'err'));
+window.addEventListener('unhandledrejection', (e) => setStatus(`Có lỗi xảy ra: <code>${esc(e.reason?.name || '')} ${esc(e.reason?.message || e.reason)}</code>. Hãy tải lại trang (F5) và thử lại.`, 'err'));
 
 async function init() {
     if (!window.showDirectoryPicker) {
@@ -685,8 +717,22 @@ async function init() {
             : '<b>Trình duyệt này chưa hỗ trợ.</b> Hãy mở trang này bằng <b>Microsoft Edge</b> hoặc <b>Google Chrome</b> trên máy tính.';
         return;
     }
+    // Live Server (VS Code) tự tải lại trang mỗi khi file thay đổi -> không hợp với trang quản trị
+    const liveServer = location.port === '5500' || /live-server|livereload/i.test(document.documentElement.innerHTML.slice(-3000));
+    if (liveServer) {
+        $('unsupported').hidden = false;
+        $('unsupported').className = 'status warn';
+        $('unsupported').innerHTML = '<b>Bạn đang mở trang bằng Live Server.</b> Live Server tự tải lại trang mỗi khi lưu, nên trang quản trị sẽ bị gián đoạn.<br>Nên đóng tab này, vào thư mục <code>admin</code> trong File Explorer và <b>nháy đúp file <code>index.html</code></b> (mở bằng Chrome hoặc Edge).';
+    }
     await loadPending();
     const saved = await kvGet('dir');
+    // Trình duyệt vẫn còn giữ quyền (vd. vừa tải lại trang) -> tự mở lại, không cần bấm
+    try {
+        if (saved && await saved.queryPermission({ mode: 'readwrite' }) === 'granted') {
+            await openFolder(saved);
+            if (root) return;
+        }
+    } catch (e) { /* bỏ qua, người dùng sẽ bấm nút */ }
     if (saved) {
         const btn = $('btnReopen');
         btn.hidden = false;
