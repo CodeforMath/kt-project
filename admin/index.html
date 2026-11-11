@@ -689,10 +689,38 @@ async function loadFolder(handle) {
 }
 
 async function pickFolder() {
-    try {
-        const h = await window.showDirectoryPicker({ id: 'kt-website', mode: 'readwrite' });
-        await openFolder(h);
-    } catch (e) {
+    // Mở hộp chọn thư mục. Nếu trình duyệt báo "hủy" ngay lập tức (không có hộp nào hiện ra),
+    // thử lại lần lượt với các tùy chọn đơn giản hơn.
+    const attempts = [
+        { id: 'kt-website', mode: 'readwrite' },
+        { mode: 'readwrite', startIn: 'desktop' },
+        { mode: 'readwrite' }
+    ];
+    let lastErr;
+    for (const opts of attempts) {
+        const t0 = performance.now();
+        try {
+            const h = await window.showDirectoryPicker(opts);
+            await openFolder(h);
+            return;
+        } catch (e) {
+            lastErr = e;
+            lastErr.instant = performance.now() - t0 < 700;
+            // Người dùng tự bấm Hủy (mất hơn 0,7 giây) hoặc lỗi khác -> dừng
+            if (e.name !== 'AbortError' || !lastErr.instant) break;
+        }
+    }
+    {
+        const e = lastErr;
+        if (e.name === 'AbortError' && e.instant) {
+            setStatus(`<b>Chrome không mở được hộp chọn thư mục</b> (bị từ chối ngay, không do bạn bấm Hủy). Hãy thử lần lượt:
+                <ol style="margin:6px 0 0">
+                    <li>Đóng <b>hết</b> cửa sổ Chrome (kể cả biểu tượng Chrome ở góc phải thanh Taskbar), mở lại rồi thử.</li>
+                    <li>Mở trang này trong cửa sổ <b>Ẩn danh</b> của Chrome (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>N</kbd>) — nếu chạy được thì lỗi do một tiện ích (extension); hãy tắt bớt tiện ích tại <code>chrome://extensions</code>.</li>
+                    <li>Hoặc mở trang bằng <b>Microsoft Edge</b>.</li>
+                </ol>`, 'err');
+            return;
+        }
         if (e.name === 'AbortError') {
             setStatus('Chưa chọn được thư mục (đã bấm Hủy, hoặc chưa cho phép quyền sửa file). Hãy bấm <b>"Chọn thư mục website"</b> lại, chọn thư mục có <code>index.html</code>, rồi bấm <b>"Cho phép" / "Lưu thay đổi"</b> khi trình duyệt hỏi.', 'warn');
         } else if (e.name === 'SecurityError' || e.name === 'NotAllowedError') {
