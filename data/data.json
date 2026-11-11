@@ -1,14 +1,6 @@
 {
   "tin-tuc": [
     {
-      "id": "tin-tuc-000001",
-      "title": "Sinh viên Khoa Toán tham dự hội trại 26/3/2026",
-      "date": "26/03/2026",
-      "image": "./graph/tin-tuc-000001.jpg",
-      "excerpt": "Sinh viên Khoa Toán đạt nhiều thành tích ấn tượng tại hội trại 26/3/2026 với giải Nhì toàn đoàn và nhiều giải cá nhân nổi bật.",
-      "content": "<p>Hòa trong không khí sôi nổi của các hoạt động chào mừng ngày 26/3, sinh viên Khoa Toán đã tích cực tham gia hội trại truyền thống năm 2026 với tinh thần đoàn kết, năng động và nhiệt huyết.</p><div class='about-image-container'><img src='../graph/tin-tuc-000001.jpg' alt='CÁC HÌNH ẢNH VỀ KHOA' class='about-image'></div><p>Tại hội thao, đoàn sinh viên Khoa Toán đã đạt được nhiều thành tích ấn tượng, nổi bật là <strong>giải Nhì toàn đoàn</strong>. Bên cạnh đó, các vận động viên của khoa còn xuất sắc giành:</p><ul class=\"about-features\"><li><i class=\"fas fa-check-circle\"></i><strong> Giải Nhất:</strong> Chạy 100m</li><li><i class=\"fas fa-check-circle\"></i><strong> Giải Nhất:</strong> Ném tạ</li><li><i class=\"fas fa-check-circle\"></i><strong> Giải Ba:</strong> Kéo co nữ</li></ul><p>Những kết quả này không chỉ thể hiện tinh thần thể thao cao thượng mà còn góp phần khẳng định sự năng động, toàn diện của sinh viên Khoa Toán trong các hoạt động phong trào. Đây cũng là dịp để sinh viên giao lưu, học hỏi và tăng cường sự gắn kết trong tập thể.</p>"
-    },
-    {
       "id": "tin-tuc-000002",
       "title": "Khoa Toán HUSC ghi dấu ấn tại Olympic Toán học sinh viên, học sinh toàn quốc lần thứ 32 - năm 2026",
       "date": "11/04/2026",
@@ -35,6 +27,14 @@
   ],
   "doan-hoi": [
     {
+      "id": "doan-hoi-000000",
+      "title": "Sinh viên Khoa Toán tham dự hội trại 26/3/2026",
+      "date": "26/03/2026",
+      "image": "./graph/tin-tuc-000001.jpg",
+      "excerpt": "Sinh viên Khoa Toán đạt nhiều thành tích ấn tượng tại hội trại 26/3/2026 với giải Nhì toàn đoàn và nhiều giải cá nhân nổi bật.",
+      "content": "<p>Hòa trong không khí sôi nổi của các hoạt động chào mừng ngày 26/3, sinh viên Khoa Toán đã tích cực tham gia hội trại truyền thống năm 2026 với tinh thần đoàn kết, năng động và nhiệt huyết.</p><div class='about-image-container'><img src='../graph/tin-tuc-000001.jpg' alt='CÁC HÌNH ẢNH VỀ KHOA' class='about-image'></div><p>Tại hội thao, đoàn sinh viên Khoa Toán đã đạt được nhiều thành tích ấn tượng, nổi bật là <strong>giải Nhì toàn đoàn</strong>. Bên cạnh đó, các vận động viên của khoa còn xuất sắc giành:</p><ul class=\"about-features\"><li><i class=\"fas fa-check-circle\"></i><strong> Giải Nhất:</strong> Chạy 100m</li><li><i class=\"fas fa-check-circle\"></i><strong> Giải Nhất:</strong> Ném tạ</li><li><i class=\"fas fa-check-circle\"></i><strong> Giải Ba:</strong> Kéo co nữ</li></ul><p>Những kết quả này không chỉ thể hiện tinh thần thể thao cao thượng mà còn góp phần khẳng định sự năng động, toàn diện của sinh viên Khoa Toán trong các hoạt động phong trào. Đây cũng là dịp để sinh viên giao lưu, học hỏi và tăng cường sự gắn kết trong tập thể.</p>"
+    },
+    {
       "id": "doan-hoi-000001",
       "title": "NGÀY HỘI CHÀO ĐÓN TÂN SINH VIÊN K50 – NHỮNG KHOẢNH KHẮC ĐÁNG NHỚ",
       "date": "03/10/2026",
@@ -42,11 +42,5 @@
       "excerpt": "Ngày 03/10/2026, Liên Chi đoàn Toán đã tham gia Ngày hội Chào đón Tân sinh viên K50 với nhiều hoạt động sôi nổi và những kỷ niệm đáng nhớ.",
       "content": "<p>Ngày 03/10/2026, Liên Chi đoàn Toán đã tham gia <strong>Ngày hội Chào đón Tân sinh viên K50</strong> với nhiều hoạt động sôi nổi và những kỷ niệm đáng nhớ. Với sự đồng hành và hỗ trợ nhiệt tình của các anh chị sinh viên năm 2, năm 3 và năm 4, các bạn tân sinh viên K50 đã nhanh chóng hòa mình vào không khí náo nhiệt của ngày hội. Những khoảng cách ban đầu dần được xóa nhòa qua các hoạt động tập thể, những tiếng cười và tinh thần đồng đội.</p><div class='about-image-container'><img src='../graph/doan-hoi-000001-4.jpg' alt='Ngày hội Chào đón Tân sinh viên K50' class='about-image'></div><p>Trong khuôn khổ chương trình, các bạn sinh viên đã nhiệt tình tham gia các trò chơi <strong>teambuilding</strong>, cùng nhau phối hợp, vượt qua thử thách và tạo nên nhiều khoảnh khắc vui nhộn.</p><div class='about-image-container'><img src='../graph/doan-hoi-000001-3.jpg' alt='Liên Chi đoàn Toán tham gia hoạt động Team Building' class='about-image'></div><p>Đặc biệt, tại <strong>Chung kết Tài năng Sinh viên</strong>, Liên Chi đoàn Toán đã mang đến tiết mục múa <strong>“Túc duyên”</strong>, để lại nhiều ấn tượng và xuất sắc đạt <strong>Giải Ba hạng mục Nhảy – Múa</strong>.</p><div class='about-image-container'><img src='../graph/doan-hoi-000001.jpg' alt='Liên Chi đoàn Toán biểu diễn tiết mục Túc duyên' class='about-image'></div><p>Bên cạnh đó, tập thể Liên Chi đoàn Toán còn đạt <strong>Giải Khuyến khích nội dung Teambuilding</strong>. Tuy nhiên, điều đáng nhớ nhất không chỉ nằm ở những giải thưởng, mà còn là những trận cười sảng khoái, tinh thần đoàn kết và niềm vui mà các bạn đã cùng nhau tạo nên trong suốt ngày hội.</p><div class='about-image-container'><img src='../graph/doan-hoi-000001-1.jpg' alt='Sinh viên Liên Chi đoàn Toán tham gia ngày hội' class='about-image'></div><p>Trong dịp này, bạn <strong>Tuyết Anh – Ủy viên Ban Chấp hành Liên Chi đoàn Toán</strong> đã được vinh danh với những thành tích xuất sắc trong công tác Đoàn và phong trào sinh viên. Bên cạnh đó, bạn <strong>Thu Uyên – sinh viên K50</strong> cũng vinh dự nhận được học bổng từ nhà tài trợ, góp thêm một dấu ấn ý nghĩa cho ngày hội.</p><div class='about-image-container'><img src='../graph/doan-hoi-000001-2.jpg' alt='Sinh viên K50 và các anh chị Liên Chi đoàn Toán' class='about-image'></div><p>Ngày hội đã khép lại, nhưng những khoảnh khắc đẹp vẫn sẽ là một phần đáng nhớ trong hành trình sinh viên của K50. Hy vọng rằng đây sẽ là khởi đầu cho một chặng đường đại học thật nhiều trải nghiệm, tình bạn và những kỷ niệm đẹp dưới mái nhà chung của Liên Chi đoàn Toán.</p>"
     }
-  ],
-  "thong-bao":[
-
-  ],
-  "hoc-bong":[
-    
   ]
 }

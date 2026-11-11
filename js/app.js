@@ -1,210 +1,240 @@
 /**
- * HUSC - Faculty of Mathematics JS Framework
+ * HUSC - Khoa Toán học: mã xử lý chung cho toàn bộ website
+ * ----------------------------------------------------------
+ * - Đọc tin tức từ data/data.json và cán bộ từ data/staff.json rồi hiển thị.
+ * - Chuyển trang không cần tải lại toàn bộ (chỉ thay phần <main id="main-content">).
+ *
+ * Người cập nhật nội dung thường KHÔNG cần sửa file này:
+ *   - Thêm/sửa bài viết  -> dùng admin/index.html (hoặc sửa data/data.json)
+ *   - Thêm/sửa cán bộ    -> sửa data/staff.json
+ *   - Sửa menu, chân trang -> sửa js/layout.js
+ * Xem thêm HUONG-DAN.md.
  */
 
-// --- 1. CÁC HÀM TIỆN ÍCH NGOÀI ---
+// Tên tiếng Việt của từng chuyên mục trong data/data.json.
+// Muốn thêm chuyên mục mới: thêm một dòng ở đây, thêm mục vào menu (js/layout.js)
+// và thêm mảng cùng tên vào data/data.json.
+const CATEGORIES = {
+    'tin-tuc':   { label: 'Tin tức',   title: 'TIN TỨC' },
+    'thong-bao': { label: 'Thông báo', title: 'THÔNG BÁO' },
+    'hoc-bong':  { label: 'Học bổng',  title: 'HỌC BỔNG' },
+    'doan-hoi':  { label: 'Đoàn hội',  title: 'ĐOÀN - HỘI' }
+};
+
+// --- 1. CÁC HÀM TIỆN ÍCH DÙNG TRONG HTML ---
 /**
- * Hàm điều khiển đóng/mở nội dung dùng chung
- * @param {string} contentId - ID của thẻ div chứa nội dung cần ẩn/hiện
- * @param {string} btnId - ID của thẻ button tương ứng
+ * Đóng/mở phần "Xem thêm"
+ * @param {string} contentId - ID của khối nội dung cần ẩn/hiện
+ * @param {string} btnId - ID của nút bấm tương ứng
  */
 function toggleContent(contentId, btnId) {
-    var content = document.getElementById(contentId);
-    var btn = document.getElementById(btnId);
-    
+    const content = document.getElementById(contentId);
+    const btn = document.getElementById(btnId);
     if (!content || !btn) return;
 
-    // Kiểm tra trạng thái hiện tại
-    if (content.style.display === "none" || content.style.display === "") {
-        // Mở rộng nội dung
-        content.style.display = "block";
-        btn.innerHTML = 'Thu gọn <i class="fas fa-chevron-up"></i>';
-    } else {
-        // Thu gọn nội dung
-        content.style.display = "none";
-        btn.innerHTML = 'Xem thêm <i class="fas fa-chevron-right"></i>';
-        
-        // Cuộn trang về đúng vị trí section chứa nội dung đó
-        btn.closest('section').scrollIntoView({ behavior: "smooth" });
-    }
+    const isHidden = content.style.display === 'none' || content.style.display === '';
+    content.style.display = isHidden ? 'block' : 'none';
+    btn.setAttribute('aria-expanded', String(isHidden));
+    btn.innerHTML = isHidden
+        ? 'Thu gọn <i class="fas fa-chevron-up"></i>'
+        : 'Xem thêm <i class="fas fa-chevron-right"></i>';
+    if (!isHidden) btn.closest('section')?.scrollIntoView({ behavior: 'smooth' });
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const mainContent = document.getElementById('main-content');
-    const homeContent = mainContent ? mainContent.innerHTML : '';
 
-    // Hàm quan sát phần tử khi cuộn
-    function initScrollObserver() {
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('show');
-                    // Nếu muốn hiệu ứng chỉ chạy 1 lần, hãy bỏ comment dòng dưới:
-                    // observer.unobserve(entry.target);
-                }
-            });
-        }, { threshold: 0.1 }); // 0.1 nghĩa là hiện ra khi 10% phần tử đã vào màn hình
+    // --- 2. ĐƯỜNG DẪN GỐC ---
+    // Lấy từ js/layout.js để chạy đúng cả khi web nằm trong thư mục con (vd. GitHub Pages)
+    const REPO_PATH = window.SiteLayout
+        ? new URL(window.SiteLayout.BASE).pathname
+        : (location.pathname.includes('/pages/')
+            ? location.pathname.split('/pages/')[0] + '/'
+            : location.pathname.substring(0, location.pathname.lastIndexOf('/') + 1));
 
-        // Áp dụng cho các section hoặc thẻ bạn muốn
-        document.querySelectorAll('.animate-on-scroll').forEach(el => observer.observe(el));
-    }
-
-    // Gọi hàm này sau khi render nội dung xong
-    // Bạn hãy gọi nó ở cuối hàm runPageLogic()
-
-    // --- 2. CẤU HÌNH ĐƯỜNG DẪN GỐC ---
-    const getRepoPath = () => {
-        const path = window.location.pathname;
-        if (path.includes('/pages/')) {
-            return path.split('/pages/')[0] + '/';
-        }
-        return path.substring(0, path.lastIndexOf('/') + 1);
-    };
-
-    const REPO_PATH = getRepoPath();
+    // ?v=... để trình duyệt luôn lấy dữ liệu mới nhất
     const STAFF_JSON = REPO_PATH + 'data/staff.json?v=' + Date.now();
     const NEWS_JSON = REPO_PATH + 'data/data.json?v=' + Date.now();
 
-    const formatDateForSort = (d) => d ? d.split('/').reverse().join('') : '0';
+    // Ảnh dự phòng khi ảnh bài viết / ảnh cán bộ bị thiếu
+    const DEFAULT_IMG = REPO_PATH + 'graph/logokhoa.png';
+    const DEFAULT_AVATAR = 'data:image/svg+xml,' + encodeURIComponent(
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 120"><rect width="100" height="120" fill="#e6ecf2"/>' +
+        '<circle cx="50" cy="45" r="22" fill="#aab8c6"/><path d="M10 120c4-30 22-42 40-42s36 12 40 42z" fill="#aab8c6"/></svg>');
+    const onErr = (fallback) => `onerror="this.onerror=null;this.src='${fallback}'"`;
 
-    const getCleanImgPath = (rawPath) => {
-        if (!rawPath) return REPO_PATH + 'images/default.jpg';
-        const clean = rawPath.replace(/^(\.\.\/|\.\/|\/)/, '');
-        return REPO_PATH + clean;
+    // "5/1/2026" -> "20260105" để sắp xếp đúng kể cả khi ngày/tháng không có số 0 đứng trước
+    const formatDateForSort = (d) => {
+        if (!d) return '0';
+        const [day = '', month = '', year = ''] = String(d).split('/');
+        return year.padStart(4, '0') + month.padStart(2, '0') + day.padStart(2, '0');
     };
 
+    const getVNCategory = (cat) => CATEGORIES[cat]?.label || 'Thông báo';
+    const detailUrl = (item) => `${REPO_PATH}pages/chi-tiet.html?type=${encodeURIComponent(item.categoryType)}&id=${encodeURIComponent(item.id)}`;
+    const emptyMessage = (text) => `<p class="empty-state"><i class="far fa-folder-open"></i> ${text}</p>`;
+
+    const getCleanImgPath = (rawPath, fallback = DEFAULT_IMG) => {
+        if (!rawPath) return fallback;
+        if (/^(https?:|data:)/.test(rawPath)) return rawPath;
+        return REPO_PATH + rawPath.replace(/^(\.\.\/|\.\/|\/)+/, '');
+    };
+
+    // Sửa đường dẫn ảnh trong nội dung bài viết (vd. ../graph/a.jpg) cho đúng thư mục gốc
     const fixInternalHtmlPaths = (htmlString) => {
         if (!htmlString) return '';
-        return htmlString.replace(/src=['"](\.\.\/|\.\/|\/|(?!\.\.\/))graph\//g, `src='${REPO_PATH}graph/`);
+        return htmlString.replace(/src=(['"])(?:\.\.\/|\.\/|\/)?graph\//g, `src=$1${REPO_PATH}graph/`);
     };
 
-    // --- 3. FETCH & RENDER DỮ LIỆU ---
+    // --- 3. ĐỌC & HIỂN THỊ DỮ LIỆU ---
+    let newsCache = null;
+    async function getNewsData() {
+        if (!newsCache) {
+            newsCache = fetch(NEWS_JSON).then(r => {
+                if (!r.ok) throw new Error('Không đọc được data/data.json');
+                return r.json();
+            }).catch(e => { newsCache = null; throw e; });
+        }
+        return newsCache;
+    }
+
+    // Gộp mọi chuyên mục thành một danh sách, bài mới nhất đứng đầu
     async function getMergedData() {
         try {
-            const res = await fetch(NEWS_JSON);
-            const data = await res.json();
+            const data = await getNewsData();
             return Object.entries(data)
                 .filter(([_, v]) => Array.isArray(v))
                 .flatMap(([k, items]) => items.map(i => ({ ...i, categoryType: k })))
                 .sort((a, b) => formatDateForSort(b.date).localeCompare(formatDateForSort(a.date)));
-        } catch (e) { return []; }
+        } catch (e) {
+            console.error(e);
+            return [];
+        }
     }
 
-    function createStaffCard(p, displayTitle, isOrgPage = false) {
-        const imgSrc = p.image ? getCleanImgPath(p.image) : REPO_PATH + 'images/default-avatar.jpg';
-        const detailLink = REPO_PATH + `pages/thong-tin-gv.html?id=${p.id}`;
-        
-        if (isOrgPage === true) {
-            return `
-                <a href="${detailLink}" class="staff-card-simple">
-                    <div class="staff-img-wrapper">
-                        <img src="${imgSrc}" onerror="this.src='${REPO_PATH}images/default-avatar.jpg'">
-                    </div>
-                    <div class="role-text">${displayTitle}</div>
-                    <div class="name-text">${p.name}</div>
-                </a>`;
+    let staffCache = null;
+    async function getStaffData() {
+        if (!staffCache) {
+            staffCache = fetch(STAFF_JSON).then(r => {
+                if (!r.ok) throw new Error('Không đọc được data/staff.json');
+                return r.json();
+            }).then(d => d.staff_data || [])
+              .catch(e => { staffCache = null; throw e; });
         }
+        return staffCache;
+    }
+
+    function createStaffCard(p, displayTitle) {
+        const role = displayTitle ? `<div class="role-text">${displayTitle}</div>` : '';
         return `
-            <a href="${detailLink}" class="staff-card-simple">
+            <a href="${REPO_PATH}pages/thong-tin-gv.html?id=${encodeURIComponent(p.id)}" class="staff-card-simple">
                 <div class="staff-img-wrapper">
-                    <img src="${imgSrc}" onerror="this.src='${REPO_PATH}images/default-avatar.jpg'">
+                    <img src="${getCleanImgPath(p.image, DEFAULT_AVATAR)}" alt="${p.name}" loading="lazy" ${onErr(DEFAULT_AVATAR)}>
                 </div>
+                ${role}
                 <div class="name-text">${p.name}</div>
             </a>`;
     }
+
+    const orgBlock = (label, inner, containerClass = 'staff-flex-container') =>
+        `<div class="org-block"><div class="org-label"><span>${label}</span></div><div class="${containerClass}">${inner}</div></div>`;
 
     async function initStaffLogic(pageType) {
         const container = document.getElementById(pageType === 'org' ? 'org-structure-container' : 'staff-all-container');
         if (!container) return;
 
         try {
-            const res = await fetch(STAFF_JSON);
-            const data = await res.json();
-            const s = data.staff_data;
+            const s = await getStaffData();
             let html = '';
 
             if (pageType === 'org') {
                 const bcn = s.filter(i => i.roles?.includes('ban-chu-nhiem'));
                 if (bcn.length) {
-                    html += `<div class="org-block"><div class="org-label"><span>Ban Chủ nhiệm Khoa</span></div><div class="staff-flex-container">
-                        ${bcn.map(p => createStaffCard(p, p.roles.includes('truong-khoa') ? 'Trưởng khoa' : 'Phó Trưởng khoa', true)).join('')}
-                    </div></div>`;
+                    html += orgBlock('Ban Chủ nhiệm Khoa',
+                        bcn.map(p => createStaffCard(p, p.roles.includes('truong-khoa') ? 'Trưởng khoa' : 'Phó Trưởng khoa')).join(''));
                 }
 
                 const troLyMapping = { 'tl-sau-dai-hoc': 'TL Sau đại học', 'tl-to-chuc-nckh': 'TL Tổ chức và NCKH', 'tl-giao-vu': 'TL Giáo vụ', 'tl-ctsv-dbcl': 'TL CTSV và ĐBCL', 'van-thu': 'Văn thư' };
                 const listTroLy = s.filter(i => i.roles?.some(r => r.startsWith('tl-') || r === 'van-thu'));
                 if (listTroLy.length) {
-                    html += `<div class="org-block"><div class="org-label"><span>Các trợ lý</span></div><div class="staff-flex-container">
-                        ${listTroLy.map(p => {
-                            const r = p.roles.find(r => r.startsWith('tl-')) || 'van-thu';
-                            return createStaffCard(p, troLyMapping[r], true);
-                        }).join('')}
-                    </div></div>`;
+                    html += orgBlock('Các trợ lý', listTroLy.map(p => {
+                        const r = p.roles.find(r => r.startsWith('tl-')) || 'van-thu';
+                        return createStaffCard(p, troLyMapping[r] || 'Trợ lý');
+                    }).join(''));
                 }
 
-                const depts = [{id:'toan-ly-thuyet', label:'Bộ môn Toán Lý thuyết'}, {id:'toan-ung-dung', label:'Bộ môn Toán Ứng dụng'}, {id:'xac-suat-thong-ke', label:'Bộ môn Xác suất - Thống kê'}];
+                const depts = [
+                    { id: 'toan-ly-thuyet', label: 'Bộ môn Toán Lý thuyết' },
+                    { id: 'toan-ung-dung', label: 'Bộ môn Toán Ứng dụng' },
+                    { id: 'xac-suat-thong-ke', label: 'Bộ môn Xác suất - Thống kê' }
+                ];
                 depts.forEach(dept => {
                     const deptStaff = s.filter(i => i.department === dept.id);
-                    if (deptStaff.length) {
-                        const leader = deptStaff.find(i => i.roles?.includes('truong-bo-mon'));
-                        const members = deptStaff.filter(i => !i.roles?.includes('truong-bo-mon'));
-                        html += `<div class="org-block"><div class="org-label"><span>${dept.label}</span></div><div class="dept-container">
-                            <div class="dept-leader-row">${leader ? createStaffCard(leader, 'Trưởng bộ môn', true) : ''}</div>
-                            <div class="staff-flex-container" style="border:none;">
-                                ${members.map(p => createStaffCard(p, 'Giảng viên', true)).join('')}
-                            </div>
-                        </div></div>`;
-                    }
+                    if (!deptStaff.length) return;
+                    const leader = deptStaff.find(i => i.roles?.includes('truong-bo-mon'));
+                    const members = deptStaff.filter(i => !i.roles?.includes('truong-bo-mon'));
+                    html += orgBlock(dept.label, `
+                        <div class="dept-leader-row">${leader ? createStaffCard(leader, 'Trưởng bộ môn') : ''}</div>
+                        <div class="staff-flex-container" style="border:none;">
+                            ${members.map(p => createStaffCard(p, 'Giảng viên')).join('')}
+                        </div>`, 'dept-container');
                 });
             } else {
                 const members = s.filter(i => i.type === 'giang-vien');
-                html += `<div class="org-block"><div class="org-label"><span>Giảng viên</span></div><div class="staff-flex-container">
-                    ${members.map(p => createStaffCard(p, null, false)).join('')}
-                </div></div>`;
-                
+                html += orgBlock('Giảng viên', members.map(p => createStaffCard(p)).join(''));
+
                 const staff = s.filter(i => i.type === 'van-thu');
-                if(staff.length) {
-                    html += `<div class="org-block"><div class="org-label"><span>Văn thư</span></div><div class="staff-flex-container">
-                        ${staff.map(p => createStaffCard(p, null, false)).join('')}
-                    </div></div>`;
-                }
+                if (staff.length) html += orgBlock('Văn thư', staff.map(p => createStaffCard(p)).join(''));
             }
-            container.innerHTML = html;
-        } catch (e) { console.error(e); }
+            container.innerHTML = html || emptyMessage('Danh sách cán bộ đang được cập nhật.');
+        } catch (e) {
+            console.error(e);
+            container.innerHTML = emptyMessage('Không tải được danh sách cán bộ. Vui lòng thử lại sau.');
+        }
     }
 
     async function renderStaffDetail(id) {
-        if (!id) return;
-        try {
-            const res = await fetch(STAFF_JSON);
-            const data = await res.json();
-            const p = data.staff_data.find(s => String(s.id) === String(id));
-            if (!p) return;
+        const wrapper = document.querySelector('.lecturer-profile-wrapper');
+        const showNotFound = () => {
+            if (wrapper) wrapper.innerHTML = emptyMessage(`Không tìm thấy thông tin giảng viên. <a href="${REPO_PATH}pages/doi-ngu-can-bo.html">Xem danh sách cán bộ</a>`);
+        };
+        if (!id) return showNotFound();
 
-            const setVal = (id, val, attr = 'innerText') => { 
-                const el = document.getElementById(id); 
-                if (el) el[attr] = val || '---'; 
+        try {
+            const staff = await getStaffData();
+            const p = staff.find(s => String(s.id) === String(id));
+            if (!p) return showNotFound();
+
+            document.title = `${p.name} - Khoa Toán HUSC`;
+            const setVal = (elId, val) => {
+                const el = document.getElementById(elId);
+                if (el) el.innerText = val || '---';
             };
 
-            setVal('gv-name-sidebar', p.name); 
-            setVal('gv-fullname', p.name); 
-            setVal('gv-gender', p.gender || 'Nam');
-            setVal('gv-birthday', p.birthday); 
+            setVal('gv-name-sidebar', p.name);
+            setVal('gv-fullname', p.name);
+            setVal('gv-gender', p.gender);
+            setVal('gv-birthday', p.birthday);
             setVal('gv-phone', p.contact?.phone);
 
             const emailEl = document.getElementById('gv-email');
-            if (emailEl) { 
-                emailEl.innerText = p.contact?.email || '---'; 
-                emailEl.href = p.contact?.email ? `mailto:${p.contact.email}` : '#'; 
+            if (emailEl) {
+                emailEl.innerText = p.contact?.email || '---';
+                emailEl.href = p.contact?.email ? `mailto:${p.contact.email}` : '#';
             }
 
             const imgEl = document.getElementById('gv-image');
-            if (imgEl) imgEl.src = getCleanImgPath(p.image || 'images/default-avatar.jpg');
+            if (imgEl) {
+                imgEl.onerror = () => { imgEl.onerror = null; imgEl.src = DEFAULT_AVATAR; };
+                imgEl.src = getCleanImgPath(p.image, DEFAULT_AVATAR);
+                imgEl.alt = p.name;
+            }
 
             const specialtyBox = document.querySelector('.specialty-content');
             const eduList = document.getElementById('gv-education-list');
+            const updating = '<p style="color: #666; font-style: italic; margin-top: 10px;">Dữ liệu đang được cập nhật...</p>';
 
-            if (p.type === "giang-vien") {
+            if (p.type === 'giang-vien') {
                 if (specialtyBox) {
                     specialtyBox.innerHTML = `
                         <h6 class="spec-title">1. Lĩnh vực nghiên cứu</h6>
@@ -218,10 +248,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         </ul>
                         <h6 class="spec-title">3. Dữ liệu khoa học</h6>
                         <div class="science-link-wrapper">
-                            <a id="gv-science-link" href="${p.science_url || '#'}" target="_blank" class="view-more-blue" style="${p.science_url ? '' : 'display:none'}">
-                                <i class="fas fa-external-link-alt" style="margin-right: 8px;"></i> 
+                            ${p.science_url ? `<a id="gv-science-link" href="${p.science_url}" target="_blank" rel="noopener" class="view-more-blue">
+                                <i class="fas fa-external-link-alt" style="margin-right: 8px;"></i>
                                 Xem chi tiết dữ liệu khoa học của giảng viên
-                            </a>
+                            </a>` : '<p>Đang cập nhật...</p>'}
                         </div>`;
                 }
                 if (eduList) {
@@ -233,324 +263,265 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <li><strong>Nơi đào tạo:</strong> ${e.place}</li>
                                 <li><strong>Năm tốt nghiệp:</strong> ${e.year}</li>
                             </ul>
-                        </div>`).join('') || 'Đang cập nhật';
+                        </div>`).join('') || updating;
                 }
             } else {
-                if (specialtyBox) specialtyBox.innerHTML = `<p style="color: #666; font-style: italic; margin-top: 10px;">Dữ liệu đang được cập nhật...</p>`;
-                if (eduList) eduList.innerHTML = `<p style="color: #666; font-style: italic;">Dữ liệu đang được cập nhật...</p>`;
+                if (specialtyBox) specialtyBox.innerHTML = updating;
+                if (eduList) eduList.innerHTML = updating;
             }
-        } catch (e) { console.error("Lỗi render:", e); }
+        } catch (e) {
+            console.error('Lỗi hiển thị giảng viên:', e);
+            showNotFound();
+        }
     }
 
     async function initHomePage() {
-    const newsContainer = document.getElementById('latest-news-container'); 
-    const noticeContainer = document.getElementById('latest-notices-container'); 
-    
-    if (!newsContainer || !noticeContainer) return;
+        const newsContainer = document.getElementById('latest-news-container');
+        const noticeContainer = document.getElementById('latest-notices-container');
+        if (!newsContainer || !noticeContainer) return;
 
-    try {
-        const allData = await getMergedData(); // Đã bao gồm tin tức + thông báo
-
-        // 1. Bài tin tức mới nhất (Tiêu điểm)
-        const topNews = allData.find(item => item.categoryType === 'tin-tuc'||
-            item.categoryType === 'thong-bao'|| item.categoryType === 'hoc-bong' || item.categoryType === 'doan-hoi'
-        );
-        if (topNews) {
-            newsContainer.innerHTML = `
-                <div class="featured-news">
-                    <a href="${REPO_PATH}pages/chi-tiet.html?type=${topNews.categoryType}&id=${topNews.id}" class="news-img-wrapper">
-                        <img src="${getCleanImgPath(topNews.image)}" alt="${topNews.title}">
-                    </a>
-                    <div class="news-info">
-                        <span class="news-date">${topNews.date}</span>
-                        <a href="${REPO_PATH}pages/chi-tiet.html?type=${topNews.categoryType}&id=${topNews.id}" style="text-decoration:none; color:inherit;">
-                            <h4 class="news-item-title">${topNews.title}</h4>
-                        </a>
-                        <p class="news-excerpt">${topNews.excerpt || ''}</p>
-                    </div>
-                </div>`;
+        const allData = await getMergedData();
+        if (!allData.length) {
+            newsContainer.innerHTML = emptyMessage('Chưa có tin tức.');
+            noticeContainer.innerHTML = '';
+            return;
         }
 
-        // 2. Danh sách 10 bài mới nhất (Lấy từ mọi mục)
+        // 1. Bài mới nhất (tiêu điểm)
+        const topNews = allData[0];
+        newsContainer.innerHTML = `
+            <div class="featured-news">
+                <a href="${detailUrl(topNews)}" class="news-img-wrapper">
+                    <img src="${getCleanImgPath(topNews.image)}" alt="${topNews.title}" ${onErr(DEFAULT_IMG)}>
+                </a>
+                <div class="news-info">
+                    <span class="news-date">${topNews.date} <b style="color:#004488">[${getVNCategory(topNews.categoryType)}]</b></span>
+                    <a href="${detailUrl(topNews)}" style="text-decoration:none; color:inherit;">
+                        <h4 class="news-item-title">${topNews.title}</h4>
+                    </a>
+                    <p class="news-excerpt">${topNews.excerpt || ''}</p>
+                </div>
+            </div>`;
+
+        // 2. 10 bài tiếp theo (mọi chuyên mục)
         noticeContainer.innerHTML = allData.slice(1, 11).map(i => `
             <li>
                 <span class="t-dot"></span>
                 <div class="t-content">
-                    <span class="news-date">${i.date} <b style="color:#004488">[${i.categoryType === 'tin-tuc' ? 'Tin tức' : 'Thông báo'}]</b></span>
-                    <a href="${REPO_PATH}pages/chi-tiet.html?type=${i.categoryType}&id=${i.id}">
-                        ${i.title}
-                    </a>
+                    <span class="news-date">${i.date} <b style="color:#004488">[${getVNCategory(i.categoryType)}]</b></span>
+                    <a href="${detailUrl(i)}">${i.title}</a>
                 </div>
             </li>`).join('');
-
-    } catch (e) {
-        console.error("Lỗi trang chủ:", e);
     }
-}
 
     async function renderCategory(type) {
-    const listEl = document.getElementById('category-list');
-    if (!listEl) return;
+        const listEl = document.getElementById('category-list');
+        if (!listEl) return;
 
-    const titleEl = document.querySelector('.section-title h2') || document.getElementById('category-title');
-    
-    // Cập nhật tiêu đề trang dựa trên tham số
-    const titles = {
-        'tin-tuc': 'TIN TỨC',
-        'thong-bao': 'THÔNG BÁO',
-        'hoc-bong': 'HỌC BỔNG',
-        'doan-hoi': 'ĐOÀN - HỘI',
-        'all': 'TẤT CẢ TIN TỨC & SỰ KIỆN'
-    };
-    if (titleEl) titleEl.innerText = titles[type] || 'DANH MỤC';
+        const titleEl = document.getElementById('category-title');
+        const title = type === 'all' ? 'TẤT CẢ TIN TỨC & SỰ KIỆN' : (CATEGORIES[type]?.title || 'DANH MỤC');
+        if (titleEl) titleEl.innerText = title;
+        document.title = `${title.charAt(0)}${title.slice(1).toLowerCase()} - Khoa Toán HUSC`;
 
-    // Lấy toàn bộ dữ liệu đã gộp (Hàm getMergedData của bạn đã fetch và sort rồi)
-    const allItems = await getMergedData();
-    
-    // Lọc dữ liệu: Nếu là 'all' thì lấy hết, nếu không thì lọc theo đúng thư mục
-    const itemsToShow = type === 'all' 
-        ? allItems 
-        : allItems.filter(i => i.categoryType === type);
+        listEl.innerHTML = '<p class="loading-text">Đang tải...</p>';
+        const allItems = await getMergedData();
+        const itemsToShow = type === 'all' ? allItems : allItems.filter(i => i.categoryType === type);
 
-    // Hàm hỗ trợ lấy tên tiếng Việt của thư mục để hiển thị nhãn (Tag)
-    const getVNCategory = (cat) => {
-        const map = {'tin-tuc':'Tin tức', 'thong-bao':'Thông báo', 'hoc-bong':'Học bổng', 'doan-hoi':'Đoàn hội'};
-        return map[cat] || 'Tin tức';
-    };
+        if (!itemsToShow.length) {
+            listEl.innerHTML = emptyMessage('Chưa có bài viết nào trong mục này.');
+            return;
+        }
 
-    listEl.innerHTML = itemsToShow.map(i => `
-        <div class="news-item-card">
-            <div class="news-img-box">
-                <img src="${getCleanImgPath(i.image)}" class="news-thumb" onerror="this.src='${REPO_PATH}images/default.jpg'">
-            </div>
-            <div class="news-body">
-                <div class="news-meta">
-                    <span class="news-date">${i.date}</span>
-                    <span class="news-category-tag" style="color: #004488; font-weight: bold; margin-left: 8px;">
-                        [${getVNCategory(i.categoryType)}]
-                    </span>
-                </div>
-                <a href="${REPO_PATH}pages/chi-tiet.html?type=${i.categoryType}&id=${i.id}" class="news-item-title">
-                    ${i.title}
+        listEl.innerHTML = itemsToShow.map(i => `
+            <div class="news-item-card">
+                <a href="${detailUrl(i)}" class="news-img-box">
+                    <img src="${getCleanImgPath(i.image)}" class="news-thumb" alt="${i.title}" loading="lazy" ${onErr(DEFAULT_IMG)}>
                 </a>
-                <p class="news-excerpt">${i.excerpt || ''}</p>
-            </div>
-        </div>`).join('');
-}
+                <div class="news-body">
+                    <div class="news-meta">
+                        <span class="news-date">${i.date}</span>
+                        <span class="news-category-tag" style="color: #004488; font-weight: bold; margin-left: 8px;">
+                            [${getVNCategory(i.categoryType)}]
+                        </span>
+                    </div>
+                    <a href="${detailUrl(i)}" class="news-item-title">${i.title}</a>
+                    <p class="news-excerpt">${i.excerpt || ''}</p>
+                </div>
+            </div>`).join('');
+    }
 
     async function renderDetail(type, id) {
         const contentEl = document.getElementById('post-content');
         if (!contentEl) return;
-        try {
-            const res = await fetch(NEWS_JSON);
-            const data = await res.json();
-            const post = data[type]?.find(p => String(p.id) === String(id));
-            if (post) {
-                document.getElementById('post-title').innerText = post.title;
-                contentEl.innerHTML = fixInternalHtmlPaths(post.content || post.excerpt);
-            }
-        } catch (e) { console.error(e); }
+        const titleEl = document.getElementById('post-title');
+        const dateEl = document.getElementById('post-date');
+
+        const allItems = await getMergedData();
+        // Tìm đúng chuyên mục trước; nếu bài đã được chuyển sang chuyên mục khác thì tìm theo id
+        const post = allItems.find(p => p.categoryType === type && String(p.id) === String(id))
+                  || allItems.find(p => String(p.id) === String(id));
+
+        if (!post) {
+            if (titleEl) titleEl.innerText = 'Không tìm thấy bài viết';
+            contentEl.innerHTML = emptyMessage(`Bài viết có thể đã bị gỡ hoặc đường dẫn không đúng. <a href="${REPO_PATH}pages/chuyen-muc.html?type=all">Xem tất cả tin tức</a>`);
+            return;
+        }
+
+        document.title = `${post.title} - Khoa Toán HUSC`;
+        if (titleEl) titleEl.innerText = post.title;
+        if (dateEl) dateEl.innerHTML = `<i class="far fa-calendar-alt"></i> ${post.date || ''} &nbsp;·&nbsp; ` +
+            `<a href="${REPO_PATH}pages/chuyen-muc.html?type=${post.categoryType}">${getVNCategory(post.categoryType)}</a>`;
+        contentEl.innerHTML = fixInternalHtmlPaths(post.content || post.excerpt);
     }
 
-    // --- 4. HỆ THỐNG MENU MOBILE ---
-    function initMobileMenu() {
-        const menuBtn = document.querySelector('.mobile-menu-toggle');
-        const nav = document.querySelector('.husc-nav');
-        if (!menuBtn || !nav) return;
+    // --- 4. MENU TRÊN ĐIỆN THOẠI ---
+    const nav = document.querySelector('.husc-nav');
+    const menuBtn = document.querySelector('.mobile-menu-toggle');
 
-        const updateIcon = (isOpen) => {
+    function closeMobileMenu() {
+        if (!nav) return;
+        nav.classList.remove('active');
+        nav.querySelectorAll('.open').forEach(s => s.classList.remove('open'));
+        nav.querySelectorAll('.active-parent').forEach(p => p.classList.remove('active-parent'));
+        if (menuBtn) {
+            const icon = menuBtn.querySelector('i');
+            if (icon) icon.className = 'fas fa-bars';
+            menuBtn.setAttribute('aria-expanded', 'false');
+        }
+    }
+
+    function initMobileMenu() {
+        if (!menuBtn || !nav) return;
+        menuBtn.setAttribute('aria-expanded', 'false');
+
+        menuBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const isOpen = nav.classList.toggle('active');
             const icon = menuBtn.querySelector('i');
             if (icon) icon.className = isOpen ? 'fas fa-times' : 'fas fa-bars';
-        };
+            menuBtn.setAttribute('aria-expanded', String(isOpen));
+        });
 
-        menuBtn.onclick = (e) => {
-            e.preventDefault(); e.stopPropagation();
-            const isNowActive = nav.classList.toggle('active');
-            updateIcon(isNowActive);
-        };
-
+        // Bấm vào mục có menu con: mở/đóng menu con (chỉ trên màn hình nhỏ)
         nav.querySelectorAll('li').forEach(item => {
             const link = item.querySelector(':scope > a');
             const subMenu = item.querySelector(':scope > .sub-menu, :scope > .sub-menu-lvl3');
-            if (link) {
-                link.onclick = (e) => {
-                    if (window.innerWidth <= 1024) {
-                        if (subMenu) {
-                            e.preventDefault(); e.stopPropagation();
-                            const parentUl = item.parentElement;
-                            parentUl.querySelectorAll(':scope > li.active-parent').forEach(activeItem => {
-                                if (activeItem !== item) {
-                                    activeItem.classList.remove('active-parent');
-                                    const activeSub = activeItem.querySelector(':scope > .sub-menu, :scope > .sub-menu-lvl3');
-                                    if (activeSub) activeSub.classList.remove('open');
-                                }
-                            });
-                            const isOpening = subMenu.classList.toggle('open');
-                            item.classList.toggle('active-parent', isOpening);
-                        } else {
-                            nav.classList.remove('active');
-                            updateIcon(false);
-                        }
-                    }
-                };
-            }
+            if (!link || !subMenu) return;
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (window.innerWidth > 1024) return;
+                e.stopPropagation();
+                item.parentElement.querySelectorAll(':scope > li.active-parent').forEach(other => {
+                    if (other === item) return;
+                    other.classList.remove('active-parent');
+                    other.querySelector(':scope > .sub-menu, :scope > .sub-menu-lvl3')?.classList.remove('open');
+                });
+                const isOpening = subMenu.classList.toggle('open');
+                item.classList.toggle('active-parent', isOpening);
+            });
         });
 
-        document.onclick = (e) => {
-            if (!nav.contains(e.target) && !menuBtn.contains(e.target)) {
-                nav.classList.remove('active');
-                updateIcon(false);
-                nav.querySelectorAll('.open').forEach(s => s.classList.remove('open'));
-                nav.querySelectorAll('.active-parent').forEach(p => p.classList.remove('active-parent'));
-            }
-        };
+        document.addEventListener('click', (e) => {
+            if (!nav.contains(e.target) && !menuBtn.contains(e.target)) closeMobileMenu();
+        });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMobileMenu(); });
     }
 
-    // --- 5. ĐIỀU HƯỚNG SPA ---
-    async function runPageLogic(isPopState = false) {
-        const url = new URL(window.location.href);
+    // --- 5. CHUYỂN TRANG KHÔNG TẢI LẠI ---
+    const isHomePath = (path) => path === REPO_PATH || path === REPO_PATH + 'index.html';
+
+    // Hiển thị dữ liệu động tùy theo trang hiện tại
+    async function runPageLogic() {
+        const url = new URL(location.href);
         const path = url.pathname;
         const id = url.searchParams.get('id');
         const type = url.searchParams.get('type');
-        const isHomePage = path.endsWith('index.html') || path === REPO_PATH || path === REPO_PATH + 'index.html';
 
-        // --- BƯỚC MỚI: XỬ LÝ NẠP NỘI DUNG KHI BACK TRANG TRUNG GIAN ---
-        if (isPopState && !isHomePage) {
-            try {
-                // Tải lại file .html tương ứng với URL hiện tại
-                const response = await fetch(path);
-                const html = await response.text();
-                const doc = new DOMParser().parseFromString(html, 'text/html');
-                const newContent = doc.getElementById('main-content') || doc.querySelector('main');
-                if (newContent && mainContent) {
-                    mainContent.innerHTML = newContent.innerHTML;
-                }
-            } catch (e) {
-                console.error("Lỗi nạp trang trung gian khi Back:", e);
-            }
+        if (path.endsWith('thong-tin-gv.html')) await renderStaffDetail(id);
+        else if (path.endsWith('co-cau-to-chuc.html')) await initStaffLogic('org');
+        else if (path.endsWith('doi-ngu-can-bo.html')) await initStaffLogic('all');
+        else if (path.endsWith('chi-tiet.html')) await renderDetail(type, id);
+        else if (path.endsWith('chuyen-muc.html')) await renderCategory(type || 'all');
+        else if (isHomePath(path)) await initHomePage();
+
+        // Hiệu ứng xuất hiện khi cuộn
+        if (mainContent) {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('show'); });
+            }, { threshold: 0.1 });
+            mainContent.querySelectorAll('section').forEach(sec => {
+                sec.classList.add('animate-on-scroll');
+                observer.observe(sec);
+            });
         }
-
-        // --- LOGIC RENDER DỮ LIỆU (Giữ nguyên) ---
-        if (path.includes('thong-tin-gv.html')) {
-            await renderStaffDetail(id);
-        } else if (path.includes('co-cau-to-chuc.html')) {
-            await initStaffLogic('org');
-        } else if (path.includes('doi-ngu-can-bo.html')) {
-            await initStaffLogic('all');
-        } else if (id && type) {
-            await renderDetail(type, id);
-        } else if (type) {
-            await renderCategory(type);
-        } else if (isHomePage) {
-            if (mainContent && homeContent) mainContent.innerHTML = homeContent;
-            await initHomePage();
-        }
-
-        // --- THÊM ĐOẠN NÀY ĐỂ KÍCH HOẠT HIỆU ỨNG CUỘN ---
-        // 1. Thêm class cho tất cả các section vừa được render
-        const sections = mainContent.querySelectorAll('section');
-        sections.forEach(sec => {
-            sec.classList.add('animate-on-scroll'); // Class này định nghĩa ở CSS
-        });
-
-        // 2. Khởi tạo lại Observer cho các section mới
-        initScrollObserver();
-        // --- XỬ LÝ CUỘN TRANG (Đảm bảo về đúng vị trí) ---
-        setTimeout(() => {
-            if (isPopState && history.state && history.state.scrollY !== undefined) {
-                window.scrollTo({ top: history.state.scrollY, behavior: 'instant' });
-            } else {
-                const offset = mainContent ? mainContent.offsetTop - 80 : 0;
-                window.scrollTo({ top: offset > 0 ? offset : 0, behavior: 'smooth' });
-            }
-        }, 150); // Tăng độ trễ lên một chút để nội dung kịp đổ ra
+        window.SiteLayout?.setActive();
     }
 
-    async function loadPage(href) {
-    if (!mainContent) return;
-    
-    // Lưu vị trí cuộn trang hiện tại trước khi đi trang mới
-    history.replaceState({ ...history.state, scrollY: window.scrollY }, '', window.location.href);
-
-    const targetUrl = new URL(href, window.location.origin + REPO_PATH).href;
-    mainContent.style.opacity = '0.3';
-    
-    try {
-        const response = await fetch(targetUrl.split('?')[0]);
-        const html = await response.text();
-        const doc = new DOMParser().parseFromString(html, 'text/html');
-        const newContent = doc.getElementById('main-content') || doc.querySelector('main');
-        
-        if (newContent) {
-            // Lưu URL vào state để phục vụ việc Back/Forward
-            history.pushState({ path: targetUrl, scrollY: 0 }, '', targetUrl);
-            mainContent.innerHTML = newContent.innerHTML;
-            await runPageLogic(false); 
-        } else {
-            window.location.href = targetUrl;
-        }
-    } catch (e) {
-        window.location.href = targetUrl;
-    } finally {
-        setTimeout(() => { mainContent.style.opacity = '1'; }, 50);
+    // Tải phần nội dung chính của một trang và thay vào trang hiện tại
+    async function swapMainContent(targetUrl) {
+        const response = await fetch(targetUrl.split('?')[0].split('#')[0]);
+        if (!response.ok) throw new Error('HTTP ' + response.status);
+        const doc = new DOMParser().parseFromString(await response.text(), 'text/html');
+        const newContent = doc.getElementById('main-content');
+        if (!newContent) throw new Error('Trang không có #main-content');
+        mainContent.innerHTML = newContent.innerHTML;
+        if (doc.title) document.title = doc.title;
     }
-}
-    
-    // --- 6. KHỞI TẠO EVENT LISTENERS ---
+
+    async function loadPage(targetUrl) {
+        // Lưu vị trí cuộn để khi bấm "Quay lại" trở về đúng chỗ
+        history.replaceState({ ...history.state, scrollY: window.scrollY }, '', location.href);
+        mainContent.style.opacity = '0.3';
+        try {
+            await swapMainContent(targetUrl);
+            history.pushState({ scrollY: 0 }, '', targetUrl);
+            closeMobileMenu();
+            await runPageLogic();
+            const offset = mainContent.offsetTop - 80;
+            window.scrollTo({ top: offset > 0 ? offset : 0, behavior: 'smooth' });
+        } catch (e) {
+            // Có lỗi thì tải lại cả trang theo cách bình thường
+            location.href = targetUrl;
+        } finally {
+            mainContent.style.opacity = '1';
+        }
+    }
+
     initMobileMenu();
 
     document.addEventListener('click', (e) => {
-    // 1. Xác định thẻ <a> gần nhất với điểm click
-    const link = e.target.closest('a');
-    
-    // 2. Các trường hợp ngoại lệ không xử lý bằng SPA
-    if (!link || 
-        link.target === '_blank' || 
-        link.href.includes('#') || 
-        link.href.startsWith('mailto:') || 
-        link.href.startsWith('tel:')) return;
+        const link = e.target.closest('a');
+        if (!link || !mainContent) return;
 
-    // 3. Xử lý menu trên Mobile: Nếu có menu con thì không chuyển trang ngay mà để toggle
-    const parentLi = link.closest('li');
-    if (window.innerWidth <= 1024 && parentLi?.querySelector('ul')) return; 
+        const rawHref = link.getAttribute('href');
+        if (!rawHref) return;
+        if (rawHref === '#') { e.preventDefault(); return; }
 
-    // 4. Lấy đường dẫn href
-    const href = link.getAttribute('href');
-    if (!href) return;
+        // Để trình duyệt tự xử lý: mở tab mới, Ctrl/Shift+click, link ngoài, tải file, link neo...
+        if (e.defaultPrevented || e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
+        if (link.target === '_blank' || link.hasAttribute('download')) return;
 
-    // 5. Kiểm tra nếu là link nội bộ (không bắt đầu bằng http/https)
-    if (!href.startsWith('http') && !href.startsWith('//')) {
+        const url = new URL(link.href);
+        if (url.origin !== location.origin) return;
+        if (!url.pathname.startsWith(REPO_PATH) || url.pathname.startsWith(REPO_PATH + 'admin/')) return;
+        if (!/(\.html|\/)$/.test(url.pathname)) return; // pdf, ảnh, ...
+        if (url.hash && url.pathname === location.pathname && url.search === location.search) return;
+
         e.preventDefault();
-
-        // --- BƯỚC QUAN TRỌNG: LƯU VỊ TRÍ CUỘN HIỆN TẠI ---
-        // Trước khi chuyển sang trang mới, ghi đè vị trí cuộn của trang hiện tại vào history
-        history.replaceState(
-            { ...history.state, scrollY: window.scrollY }, 
-            document.title, 
-            window.location.href
-        );
-
-        // 6. Xử lý logic chuyển trang
-        if (href === 'index.html' || href === '/' || href.endsWith('/index.html')) {
-            // Trang chủ
-            const homeFullUrl = REPO_PATH + 'index.html';
-            
-            // Đẩy trạng thái trang chủ vào lịch sử, vị trí cuộn mặc định là 0
-            history.pushState({ path: homeFullUrl, scrollY: 0 }, '', homeFullUrl);
-            
-            // Chạy logic render trang chủ và cuộn lên đầu (false = không phải popstate)
-            runPageLogic(false); 
-        } else {
-            // Các trang con khác
-            loadPage(href);
-        }
-    }
-});
-
-    // SỬA ĐỔI: Khi Back, truyền true vào runPageLogic để không cuộn trang
-    window.addEventListener('popstate', (event) => {
-        runPageLogic(true); 
+        loadPage(url.href);
     });
 
-    runPageLogic(); 
+    // Nút Quay lại / Tiến tới của trình duyệt
+    window.addEventListener('popstate', async (event) => {
+        try {
+            await swapMainContent(location.href);
+            await runPageLogic();
+            window.scrollTo({ top: event.state?.scrollY || 0, behavior: 'instant' });
+        } catch (e) {
+            location.reload();
+        }
+    });
+
+    runPageLogic();
 });

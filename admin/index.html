@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý bài viết - Khoa Toán HUSC</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { --primary: #004488; --primary-dark: #002d5a; --danger: #dc3545; --success: #1e8e3e; --border: #dde3ea; --muted: #667; }
+        * { box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f4f7f9; margin: 0; padding: 20px; color: #333; }
+        .wrap { max-width: 1150px; margin: auto; }
+        header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; }
+        h1 { color: var(--primary); font-size: 1.5rem; margin: 0; }
+        .card { background: #fff; border-radius: 12px; box-shadow: 0 3px 15px rgba(0,0,0,.07); padding: 22px; margin-bottom: 18px; }
+        .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+        .step { background: #eef3f9; padding: 12px 14px; border-radius: 8px; border-left: 4px solid var(--primary); font-size: 14px; line-height: 1.5; }
+        .step b { color: var(--primary); display: block; margin-bottom: 4px; }
+        code { background: #e8edf3; padding: 1px 5px; border-radius: 4px; font-size: 13px; }
+
+        .btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 16px; border: 1px solid transparent; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; background: #e9eef4; color: #333; }
+        .btn:hover { filter: brightness(.95); }
+        .btn-primary { background: var(--primary); color: #fff; }
+        .btn-success { background: var(--success); color: #fff; }
+        .btn-danger { background: #fff; color: var(--danger); border-color: #f1b8be; }
+        .btn-sm { padding: 5px 10px; font-size: 13px; }
+        .btn:disabled { opacity: .5; cursor: not-allowed; }
+
+        .status { padding: 10px 14px; border-radius: 8px; font-size: 14px; margin-bottom: 14px; }
+        .status.info { background: #e8f1fb; color: #0b4a85; }
+        .status.warn { background: #fff4d6; color: #7a5600; }
+        .status.ok { background: #e3f5e8; color: #17692f; }
+        .upload-area { border: 2px dashed #c4ccd6; padding: 24px; text-align: center; border-radius: 10px; }
+        .upload-area.drag { border-color: var(--primary); background: #f0f7ff; }
+
+        .toolbar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+        .toolbar select, .toolbar input { padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; }
+        .toolbar input { flex: 1; min-width: 180px; }
+        .spacer { flex: 1; }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: var(--primary); color: #fff; padding: 10px; text-align: left; font-size: 14px; }
+        td { padding: 10px; border-bottom: 1px solid #eee; font-size: 14px; vertical-align: middle; }
+        td.actions { white-space: nowrap; text-align: right; }
+        tr:hover td { background: #fafcff; }
+        .thumb { width: 64px; height: 44px; object-fit: cover; border-radius: 4px; background: #eee; display: block; }
+        .tag { padding: 3px 8px; border-radius: 10px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+        .tag-tin-tuc { background: #d1ecf1; color: #0c5460; }
+        .tag-thong-bao { background: #fff3cd; color: #856404; }
+        .tag-hoc-bong { background: #d4edda; color: #155724; }
+        .tag-doan-hoi { background: #f3dcf5; color: #6b1f73; }
+        .empty { text-align: center; color: var(--muted); padding: 30px; }
+        .dirty-badge { background: #fff4d6; color: #7a5600; padding: 4px 10px; border-radius: 12px; font-size: 13px; font-weight: 600; }
+
+        /* Form soạn bài */
+        dialog { width: min(1100px, 96vw); max-height: 94vh; border: none; border-radius: 12px; padding: 0; box-shadow: 0 10px 40px rgba(0,0,0,.25); }
+        dialog::backdrop { background: rgba(0,20,40,.45); }
+        .dlg-head { display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: #fff; z-index: 1; }
+        .dlg-head h2 { margin: 0; font-size: 1.15rem; color: var(--primary); }
+        .dlg-body { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 20px; }
+        .dlg-foot { display: flex; justify-content: flex-end; gap: 10px; padding: 14px 20px; border-top: 1px solid var(--border); position: sticky; bottom: 0; background: #fff; }
+        .field { margin-bottom: 14px; }
+        .field label { display: block; font-weight: 600; color: var(--primary); margin-bottom: 5px; font-size: 14px; }
+        .field input, .field select, .field textarea { width: 100%; padding: 9px 11px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; font-family: inherit; }
+        .field textarea { resize: vertical; }
+        .field input:invalid:not(:placeholder-shown) { border-color: var(--danger); }
+        .hint { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+        .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .editor-tools { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 6px; }
+        .preview-box { border: 1px solid var(--border); border-radius: 8px; padding: 16px; background: #fff; overflow: auto; max-height: 70vh; }
+        .preview-box h3 { margin-top: 0; color: #002d62; }
+        .preview-box img { max-width: 100%; border-radius: 6px; }
+        .preview-label { font-size: 12px; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); margin-bottom: 6px; font-weight: 700; }
+        .img-preview { margin-top: 8px; max-height: 120px; max-width: 100%; border-radius: 6px; display: none; }
+        @media (max-width: 800px) {
+            .dlg-body { grid-template-columns: 1fr; }
+            .row2 { grid-template-columns: 1fr; }
+            th:nth-child(1), td:nth-child(1) { display: none; }
+        }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <header>
+        <h1><i class="fas fa-newspaper"></i> Quản lý bài viết - Khoa Toán</h1>
+        <a href="../index.html" class="btn"><i class="fas fa-arrow-left"></i> Về trang chủ</a>
+    </header>
+
+    <div class="card">
+        <div class="steps">
+            <div class="step"><b>1. Mở dữ liệu</b>Trang này tự đọc <code>data/data.json</code>. Nếu không được, kéo thả file đó vào ô bên dưới.</div>
+            <div class="step"><b>2. Thêm / sửa / xóa bài</b>Ảnh của bài phải được chép trước vào thư mục <code>graph/</code>.</div>
+            <div class="step"><b>3. Tải file về</b>Bấm <b>"Tải data.json"</b> rồi chép đè file vào thư mục <code>data/</code> của website.</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div id="status" class="status info">Đang đọc dữ liệu...</div>
+        <div class="upload-area" id="dropZone" hidden>
+            <p style="margin-top:0">Kéo thả file <b>data.json</b> (trong thư mục <code>data/</code>) vào đây, hoặc</p>
+            <input type="file" id="fileInput" accept=".json,application/json">
+        </div>
+
+        <div id="manager" hidden>
+            <div class="toolbar">
+                <button class="btn btn-primary" id="btnNew"><i class="fas fa-plus"></i> Viết bài mới</button>
+                <select id="filterCat" aria-label="Lọc chuyên mục"><option value="">Tất cả chuyên mục</option></select>
+                <input type="search" id="search" placeholder="Tìm theo tiêu đề...">
+                <span id="dirtyBadge" class="dirty-badge" hidden>Có thay đổi chưa tải về</span>
+                <button class="btn btn-success" id="btnExport"><i class="fas fa-download"></i> Tải data.json</button>
+            </div>
+            <table>
+                <thead><tr><th style="width:80px">Ảnh</th><th style="width:105px">Ngày</th><th style="width:110px">Chuyên mục</th><th>Tiêu đề</th><th style="width:150px"></th></tr></thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Hộp soạn bài -->
+<dialog id="editor">
+    <form id="postForm" method="dialog">
+        <div class="dlg-head">
+            <h2 id="editorTitle">Viết bài mới</h2>
+            <button type="button" class="btn btn-sm" data-close aria-label="Đóng"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="dlg-body">
+            <div>
+                <div class="row2">
+                    <div class="field">
+                        <label for="fCat">Chuyên mục</label>
+                        <select id="fCat" required></select>
+                    </div>
+                    <div class="field">
+                        <label for="fDate">Ngày đăng</label>
+                        <input type="date" id="fDate" required>
+                    </div>
+                </div>
+                <div class="field">
+                    <label for="fTitle">Tiêu đề *</label>
+                    <input type="text" id="fTitle" required placeholder="Ví dụ: Lễ trao bằng tốt nghiệp năm 2026">
+                </div>
+                <div class="field">
+                    <label for="fImage">Ảnh đại diện</label>
+                    <input type="text" id="fImage" placeholder="ten-anh.jpg" list="imageList">
+                    <div class="hint">Gõ tên file ảnh trong thư mục <code>graph/</code> (vd. <code>tin-tuc-000005.jpg</code>). Nên đặt tên không dấu, không khoảng trắng.</div>
+                    <img id="fImagePreview" class="img-preview" alt="Xem trước ảnh">
+                </div>
+                <div class="field">
+                    <label for="fExcerpt">Tóm tắt *</label>
+                    <textarea id="fExcerpt" rows="2" required placeholder="1-2 câu hiển thị ở trang danh sách và trang chủ"></textarea>
+                </div>
+                <div class="field">
+                    <label for="fContent">Nội dung</label>
+                    <div class="editor-tools">
+                        <button type="button" class="btn btn-sm" data-wrap="strong" title="In đậm phần chữ đang chọn"><i class="fas fa-bold"></i></button>
+                        <button type="button" class="btn btn-sm" data-wrap="em" title="In nghiêng phần chữ đang chọn"><i class="fas fa-italic"></i></button>
+                        <button type="button" class="btn btn-sm" id="btnInsertImg"><i class="fas fa-image"></i> Chèn ảnh</button>
+                        <button type="button" class="btn btn-sm" id="btnInsertLink"><i class="fas fa-link"></i> Chèn link</button>
+                        <button type="button" class="btn btn-sm" id="btnInsertList"><i class="fas fa-list-ul"></i> Danh sách</button>
+                    </div>
+                    <textarea id="fContent" rows="14" placeholder="Gõ nội dung bình thường. Mỗi lần xuống dòng sẽ thành một đoạn văn mới."></textarea>
+                    <div class="hint">Không cần biết HTML: mỗi dòng là một đoạn văn. Dùng các nút phía trên để in đậm, chèn ảnh, chèn link.</div>
+                </div>
+            </div>
+            <div>
+                <div class="preview-label">Xem trước</div>
+                <div class="preview-box" id="preview"></div>
+            </div>
+        </div>
+        <div class="dlg-foot">
+            <button type="button" class="btn" data-close>Hủy</button>
+            <button type="submit" class="btn btn-primary" value="save"><i class="fas fa-check"></i> Lưu bài</button>
+        </div>
+    </form>
+</dialog>
+
+<datalist id="imageList"></datalist>
+
+<script>
+    // Danh sách chuyên mục — phải khớp với CATEGORIES trong js/app.js
+    const CATEGORIES = {
+        'tin-tuc':   'Tin tức',
+        'thong-bao': 'Thông báo',
+        'hoc-bong':  'Học bổng',
+        'doan-hoi':  'Đoàn hội'
+    };
+
+    let data = {};          // nội dung data.json
+    let dirty = false;      // có thay đổi chưa tải về
+    let editing = null;     // { cat, index } khi đang sửa bài cũ
+
+    const $ = (id) => document.getElementById(id);
+    const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+    // ---------- Ngày tháng ----------
+    const pad = (n) => String(n).padStart(2, '0');
+    const toVNDate = (iso) => { const [y, m, d] = iso.split('-'); return `${d}/${m}/${y}`; };        // 2026-03-05 -> 05/03/2026
+    const toISODate = (vn) => {                                                                       // 5/3/2026 -> 2026-03-05
+        const [d, m, y] = String(vn || '').split('/');
+        return y ? `${y}-${pad(m)}-${pad(d)}` : '';
+    };
+    const todayISO = () => { const t = new Date(); return `${t.getFullYear()}-${pad(t.getMonth() + 1)}-${pad(t.getDate())}`; };
+    const sortKey = (vn) => toISODate(vn) || '0';
+
+    // ---------- Đường dẫn ảnh ----------
+    // Trong data.json: ảnh đại diện lưu dạng "./graph/x.jpg", ảnh trong nội dung dạng "../graph/x.jpg"
+    const imageName = (p) => String(p || '').replace(/^(\.\.\/|\.\/|\/)*graph\//, '');
+    const imageSrc = (name) => name ? (/^https?:/.test(name) ? name : '../graph/' + name) : '';
+
+    // ---------- Đọc dữ liệu ----------
+    function setStatus(text, kind = 'info') {
+        const s = $('status');
+        s.className = 'status ' + kind;
+        s.innerHTML = text;
+    }
+
+    function loadData(obj, source) {
+        if (!obj || typeof obj !== 'object' || Array.isArray(obj)) throw new Error('Sai cấu trúc');
+        data = obj;
+        Object.keys(CATEGORIES).forEach(c => { if (!Array.isArray(data[c])) data[c] = []; });
+        dirty = false;
+        $('manager').hidden = false;
+        $('dropZone').hidden = true;
+        setStatus(`Đã mở dữ liệu từ <b>${esc(source)}</b> — ${countPosts()} bài viết.`, 'ok');
+        render();
+    }
+
+    const countPosts = () => Object.keys(CATEGORIES).reduce((n, c) => n + data[c].length, 0);
+
+    async function autoLoad() {
+        try {
+            const res = await fetch('../data/data.json?v=' + Date.now());
+            if (!res.ok) throw new Error();
+            loadData(await res.json(), 'data/data.json');
+        } catch (e) {
+            setStatus('Không tự đọc được <code>data/data.json</code> (thường do mở file trực tiếp, không qua web server). Hãy chọn file bằng tay:', 'warn');
+            $('dropZone').hidden = false;
+        }
+    }
+
+    function readFile(file) {
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+            try { loadData(JSON.parse(reader.result), file.name); }
+            catch (e) { setStatus('File không đúng định dạng. Hãy chọn đúng file <code>data/data.json</code>.', 'warn'); }
+        };
+        reader.readAsText(file, 'utf-8');
+    }
+
+    $('fileInput').addEventListener('change', (e) => readFile(e.target.files[0]));
+    const dz = $('dropZone');
+    dz.addEventListener('dragover', (e) => { e.preventDefault(); dz.classList.add('drag'); });
+    dz.addEventListener('dragleave', () => dz.classList.remove('drag'));
+    dz.addEventListener('drop', (e) => { e.preventDefault(); dz.classList.remove('drag'); readFile(e.dataTransfer.files[0]); });
+
+    // ---------- Danh sách bài ----------
+    function setDirty(v) {
+        dirty = v;
+        $('dirtyBadge').hidden = !v;
+    }
+
+    function render() {
+        const filter = $('filterCat').value;
+        const q = $('search').value.trim().toLowerCase();
+        const rows = [];
+        Object.keys(CATEGORIES).forEach(cat => {
+            if (filter && filter !== cat) return;
+            data[cat].forEach((item, index) => {
+                if (q && !String(item.title).toLowerCase().includes(q)) return;
+                rows.push({ cat, index, item });
+            });
+        });
+        rows.sort((a, b) => sortKey(b.item.date).localeCompare(sortKey(a.item.date)));
+
+        $('tableBody').innerHTML = rows.length ? rows.map(({ cat, index, item }) => `
+            <tr>
+                <td><img class="thumb" src="${esc(imageSrc(imageName(item.image)))}" alt="" onerror="this.style.visibility='hidden'"></td>
+                <td>${esc(item.date)}</td>
+                <td><span class="tag tag-${cat}">${CATEGORIES[cat]}</span></td>
+                <td style="font-weight:500">${esc(item.title)}</td>
+                <td class="actions">
+                    <button class="btn btn-sm" onclick="openEditor('${cat}', ${index})"><i class="fas fa-pen"></i> Sửa</button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteItem('${cat}', ${index})" title="Xóa"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>`).join('')
+            : `<tr><td colspan="5" class="empty">Không có bài viết nào.</td></tr>`;
+
+        // Gợi ý tên ảnh đã dùng
+        const names = new Set();
+        Object.keys(CATEGORIES).forEach(c => data[c].forEach(i => { const n = imageName(i.image); if (n) names.add(n); }));
+        $('imageList').innerHTML = [...names].map(n => `<option value="${esc(n)}">`).join('');
+    }
+
+    function deleteItem(cat, index) {
+        const item = data[cat][index];
+        if (!confirm(`Xóa bài viết:\n"${item.title}"?\n\n(Bài chỉ bị xóa thật sau khi bạn tải data.json về và chép đè lên website.)`)) return;
+        data[cat].splice(index, 1);
+        setDirty(true);
+        render();
+    }
+
+    // ---------- Soạn bài ----------
+    // Nội dung lưu dạng HTML. Khi người dùng gõ chữ thường (không có thẻ khối), mỗi dòng thành một <p>.
+    const BLOCK_RE = /^\s*<\/?(p|div|ul|ol|h\d|table|blockquote|figure|figcaption|iframe)\b/i;
+    function contentToHtml(text) {
+        return text.split(/\n/).map(l => l.trim()).filter(Boolean)
+            .map(l => BLOCK_RE.test(l) ? l : `<p>${l}</p>`).join('');
+    }
+    // Ngược lại: tách HTML đã lưu ra từng dòng cho dễ sửa
+    function htmlToContent(html) {
+        return String(html || '')
+            .replace(/<\/p>\s*/gi, '</p>\n')
+            .replace(/<\/(div|ul|ol|h\d|table|blockquote|figure)>\s*/gi, '</$1>\n')
+            .replace(/^\s*<p>(.*?)<\/p>$/gim, (m, inner) => /<\/?p\b/i.test(inner) ? m : inner)
+            .trim();
+    }
+
+    function nextId(cat) {
+        const max = data[cat].reduce((m, i) => {
+            const n = parseInt(String(i.id).match(/(\d+)$/)?.[1] || '0', 10);
+            return Math.max(m, n);
+        }, 0);
+        return `${cat}-${String(max + 1).padStart(6, '0')}`;
+    }
+
+    function openEditor(cat, index) {
+        editing = cat ? { cat, index } : null;
+        const item = cat ? data[cat][index] : null;
+        $('editorTitle').textContent = item ? 'Sửa bài viết' : 'Viết bài mới';
+        $('fCat').value = cat || ($('filterCat').value || 'tin-tuc');
+        $('fDate').value = item ? toISODate(item.date) : todayISO();
+        $('fTitle').value = item?.title || '';
+        $('fImage').value = imageName(item?.image);
+        $('fExcerpt').value = item?.excerpt || '';
+        $('fContent').value = htmlToContent(item?.content);
+        updatePreview();
+        $('editor').showModal();
+        $('fTitle').focus();
+    }
+
+    function updatePreview() {
+        const img = imageSrc($('fImage').value.trim());
+        const pv = $('fImagePreview');
+        pv.style.display = img ? 'block' : 'none';
+        if (img) pv.src = img;
+        $('preview').innerHTML = `
+            <h3>${esc($('fTitle').value) || '<i style="color:#aaa">(Chưa có tiêu đề)</i>'}</h3>
+            <p style="color:#888;font-size:13px">${$('fDate').value ? toVNDate($('fDate').value) : ''} · ${CATEGORIES[$('fCat').value]}</p>
+            <p style="font-style:italic;color:#555">${esc($('fExcerpt').value)}</p>
+            <hr>
+            ${contentToHtml($('fContent').value) || '<p style="color:#aaa">(Nội dung trống — trang chi tiết sẽ hiển thị phần tóm tắt)</p>'}`;
+    }
+
+    ['fCat', 'fDate', 'fTitle', 'fImage', 'fExcerpt', 'fContent'].forEach(id => $(id).addEventListener('input', updatePreview));
+
+    // Chèn đoạn mã vào vị trí con trỏ trong ô nội dung
+    function insertAtCursor(before, after = '', placeholder = '') {
+        const ta = $('fContent');
+        const { selectionStart: s, selectionEnd: e, value } = ta;
+        const selected = value.slice(s, e) || placeholder;
+        ta.value = value.slice(0, s) + before + selected + after + value.slice(e);
+        ta.focus();
+        ta.selectionStart = s + before.length;
+        ta.selectionEnd = s + before.length + selected.length;
+        updatePreview();
+    }
+
+    document.querySelectorAll('[data-wrap]').forEach(b => b.addEventListener('click', () => {
+        const t = b.dataset.wrap;
+        insertAtCursor(`<${t}>`, `</${t}>`, 'chữ');
+    }));
+    $('btnInsertImg').addEventListener('click', () => {
+        const name = prompt('Tên file ảnh trong thư mục graph/ (vd. tin-tuc-000005-1.jpg):');
+        if (!name) return;
+        const alt = prompt('Mô tả ngắn cho ảnh (không bắt buộc):') || '';
+        insertAtCursor(`\n<div class='about-image-container'><img src='../graph/${name.trim()}' alt='${alt.replace(/'/g, '')}' class='about-image'></div>\n`);
+    });
+    $('btnInsertLink').addEventListener('click', () => {
+        const href = prompt('Địa chỉ link (bắt đầu bằng https://):', 'https://');
+        if (!href || href === 'https://') return;
+        insertAtCursor(`<a href="${href.trim()}" target="_blank">`, '</a>', 'xem tại đây');
+    });
+    $('btnInsertList').addEventListener('click', () => {
+        insertAtCursor(`\n<ul class="about-features"><li><i class="fas fa-check-circle"></i> Ý thứ nhất</li><li><i class="fas fa-check-circle"></i> Ý thứ hai</li></ul>\n`);
+    });
+
+    document.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', () => $('editor').close()));
+
+    $('postForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const cat = $('fCat').value;
+        const imgName = $('fImage').value.trim();
+        const post = {
+            id: '',
+            title: $('fTitle').value.trim(),
+            date: toVNDate($('fDate').value),
+            image: imgName ? (/^https?:/.test(imgName) ? imgName : './graph/' + imgName) : '',
+            excerpt: $('fExcerpt').value.trim(),
+            content: contentToHtml($('fContent').value)
+        };
+
+        if (editing) {
+            const old = data[editing.cat][editing.index];
+            if (editing.cat === cat) {
+                post.id = old.id;
+                data[cat][editing.index] = { ...old, ...post };
+            } else {
+                // Đổi chuyên mục: chuyển bài sang mảng mới với mã mới
+                data[editing.cat].splice(editing.index, 1);
+                post.id = nextId(cat);
+                data[cat].unshift({ ...old, ...post });
+            }
+        } else {
+            post.id = nextId(cat);
+            data[cat].unshift(post);
+        }
+        setDirty(true);
+        $('editor').close();
+        render();
+        setStatus(`Đã lưu bài <b>${esc(post.title)}</b>. Nhớ bấm <b>"Tải data.json"</b> để cập nhật lên website.`, 'ok');
+    });
+
+    // ---------- Xuất file ----------
+    $('btnExport').addEventListener('click', () => {
+        const blob = new Blob([JSON.stringify(data, null, 2) + '\n'], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'data.json';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+        setDirty(false);
+        setStatus('Đã tải về <b>data.json</b>. Hãy chép đè file này vào thư mục <code>data/</code> của website (và đưa lên máy chủ / GitHub).', 'ok');
+    });
+
+    // ---------- Khởi động ----------
+    Object.entries(CATEGORIES).forEach(([k, v]) => {
+        $('filterCat').insertAdjacentHTML('beforeend', `<option value="${k}">${v}</option>`);
+        $('fCat').insertAdjacentHTML('beforeend', `<option value="${k}">${v}</option>`);
+    });
+    $('filterCat').addEventListener('change', render);
+    $('search').addEventListener('input', render);
+    $('btnNew').addEventListener('click', () => openEditor());
+
+    window.addEventListener('beforeunload', (e) => {
+        if (dirty) { e.preventDefault(); e.returnValue = ''; }
+    });
+
+    autoLoad();
+</script>
+</body>
+</html>
