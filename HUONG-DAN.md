@@ -2,11 +2,11 @@
 
 ## Dành cho người cập nhật nội dung
 
-Mở thư mục `admin`, **nháy đúp file `index.html`** (bằng Microsoft Edge hoặc Google Chrome),
-rồi bấm nút **"Hướng dẫn"** ở góc trên bên phải.
+Mở trang quản trị: gõ **địa chỉ website + `/admin/`** (hoặc nháy đúp file `admin/index.html`).
+Trang có 3 tab: **Bài viết**, **Cán bộ** và **Hướng dẫn** — mọi hướng dẫn chi tiết nằm trong tab Hướng dẫn.
 
-Toàn bộ hướng dẫn nằm trong trang đó: đăng bài, sửa cán bộ, tải lên máy chủ bằng FileZilla,
-sửa menu, xử lý sự cố.
+Tóm tắt: sửa nội dung trên trang quản trị → bấm **"Tải về các file đã thay đổi"** →
+dùng **FileZilla** kéo các file đó lên đúng thư mục (`data/`, `graph/`) trên máy chủ.
 
 ## Dành cho người kỹ thuật
 
@@ -15,8 +15,9 @@ sửa menu, xử lý sự cố.
 - `data/staff.json`: cán bộ (`staff_data`).
 - `js/layout.js`: header, menu, footer dùng chung, được chèn vào mọi trang lúc tải.
 - `js/app.js`: đọc JSON và hiển thị; chuyển trang chỉ thay phần `<main id="main-content">`.
-- `admin/index.html`: trang quản trị chạy trên máy (dùng File System Access API của Edge/Chrome)
-  để ghi trực tiếp vào thư mục website; ảnh được thu nhỏ và chuyển sang JPG ngay trên trình duyệt.
+- `admin/index.html`: đọc `../data/*.json`, chỉnh sửa trên trình duyệt, xuất file JSON và ảnh
+  (ảnh được thu nhỏ, chuyển JPG, đặt tên theo mã bài / mã cán bộ). Không ghi được gì lên máy chủ,
+  nên đặt trên web công khai vẫn an toàn.
 - Thêm chuyên mục mới: thêm vào `CATEGORIES` trong `js/app.js` **và** `admin/index.html`,
   thêm mục vào `MENU` trong `js/layout.js`.
 - Xem thử trên máy: `python -m http.server 8000` trong thư mục website rồi mở http://localhost:8000
